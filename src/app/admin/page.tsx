@@ -86,7 +86,7 @@ export default async function AdminDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-muted rounded-lg">
+                <div>
                   <Newspaper className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
@@ -95,8 +95,8 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <div>
+                  <CheckCircle className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground">{mockStats.published}</div>
@@ -104,8 +104,8 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                <div>
+                  <AlertCircle className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground">{mockStats.pendingReview}</div>
@@ -113,7 +113,7 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-muted rounded-lg">
+                <div>
                   <FileText className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
@@ -122,8 +122,8 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <Calendar className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <div>
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground">{mockStats.scheduled}</div>
@@ -131,8 +131,8 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                  <Clock className="h-5 w-5 text-red-600 dark:text-red-400" />
+                <div>
+                  <Clock className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground">{mockStats.rejected}</div>
@@ -140,8 +140,8 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div>
+                  <TrendingUp className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground">48.2K</div>
@@ -149,8 +149,8 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                  <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <div>
+                  <Users className="h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground">{mockOrgChartEmployees.length}</div>

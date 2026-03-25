@@ -311,10 +311,10 @@ export default function NewArticlePage() {
                 <h3 className="font-bold text-foreground mb-4 uppercase tracking-widest text-xs">Image</h3>
                 {form.featuredImage ? (
                   <div className="rounded-xl overflow-hidden mb-4 border border-border bg-muted">
-                    <img src={form.featuredImage} alt="Featured" className="w-full h-40 object-cover" />
+                    <img src={form.featuredImage} alt="Featured" className="w-full h-64 object-cover" />
                   </div>
                 ) : (
-                  <label className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-red-500/50 transition-colors cursor-pointer mb-4 block group">
+                  <label className="border-2 border-dashed border-border rounded-xl p-16 text-center hover:border-red-500/50 transition-colors cursor-pointer mb-4 block group">
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                       const f = e.target.files?.[0];
                       if (f) void uploadFeaturedImage(f);
@@ -323,8 +323,8 @@ export default function NewArticlePage() {
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto" />
                     ) : (
                       <>
-                        <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto mb-2 group-hover:text-red-500 transition-colors" />
-                        <p className="text-xs text-muted-foreground font-medium">Click to upload image</p>
+                        <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-3 group-hover:text-red-500 transition-colors" />
+                        <p className="text-sm text-muted-foreground font-medium">Click to upload image</p>
                       </>
                     )}
                   </label>

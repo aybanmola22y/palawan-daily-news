@@ -32,7 +32,10 @@ export default function SectionHeader({ title, href, color = "red" }: Props) {
       <div className={`${bgColor} text-white px-4 py-2 text-sm font-bold uppercase tracking-widest leading-none relative z-10 shadow-sm whitespace-nowrap`}>
         {title}
         {/* Decorative notch */}
-        <div className={`absolute top-0 -right-2 w-0 h-0 border-t-[32px] border-t-transparent border-l-[8px] border-l-current ${bgColor.replace('bg-', 'text-')}`} style={{ borderTopWidth: '34px', borderLeftWidth: '10px' }}></div>
+        <div 
+          className={`absolute top-0 -right-2 h-full w-2 ${bgColor}`} 
+          style={{ clipPath: 'polygon(0 0, 0 100%, 100% 100%)' }}
+        />
       </div>
       <div className={`flex-1 h-[2px] ${bgColor} opacity-20`} />
       
