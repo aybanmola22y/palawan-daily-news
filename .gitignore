@@ -1,0 +1,20 @@
+# dependencies
+node_modules
+
+# next.js build
+.next
+
+# replit
+.replit-artifact
+artifacts
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# logs
+npm-debug.log*
+
+# typescript build cache
+*.tsbuildinfo

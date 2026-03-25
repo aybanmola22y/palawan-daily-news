@@ -1,0 +1,32 @@
+[
+  {
+    "id": "home-billboard",
+    "type": "billboard",
+    "fit": "contain",
+    "active": true,
+    "label": "BILLBOARD ADVERTISEMENT SPACE",
+    "sublabel": "Get your brand in front of thousands of daily readers",
+    "imageUrl": "/uploads/1b35c088-324d-4cab-9fb0-02bd31a82c54.webp",
+    "linkUrl": "https://petrosphere.com.ph/"
+  },
+  {
+    "id": "home-leaderboard",
+    "type": "leaderboard",
+    "fit": "contain",
+    "active": true,
+    "label": "LEADERBOARD ADVERTISEMENT SPACE",
+    "sublabel": "Contact us at ads@palawandaily.com for rates",
+    "imageUrl": "https://res.cloudinary.com/jerrick/image/upload/v1691665225/64d4c349ab0f24001debb68f.jpg",
+    "linkUrl": "google.com"
+  },
+  {
+    "id": "article-sidebar",
+    "type": "sidebar",
+    "fit": "contain",
+    "active": true,
+    "label": "SIDEBAR ADVERTISEMENT SPACE",
+    "sublabel": "Contact us at ads@palawandaily.com for rates",
+    "imageUrl": "https://www.aljazeera.com/wp-content/uploads/2022/01/tesla.jpg?resize=1800%2C1800",
+    "linkUrl": "https://www.youtube.com/"
+  }
+]
