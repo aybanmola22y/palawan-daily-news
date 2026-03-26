@@ -98,7 +98,7 @@ export default function AdminSidebar({ user }: Props) {
       {user && (
         <div className="p-3 border-t border-sidebar-border bg-sidebar/50 backdrop-blur-sm">
           {!collapsed && (
-            <div className="flex items-center justify-between px-3 py-2 mb-2 bg-muted/30 rounded-xl border border-border/50">
+            <div className="px-3 py-2 mb-2 bg-muted/30 rounded-xl border border-border/50 space-y-2">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-white/10 text-white">
                   <span className="text-xs font-bold font-mono">{user.name[0]}</span>
@@ -108,7 +108,10 @@ export default function AdminSidebar({ user }: Props) {
                   <p className="text-[10px] text-muted-foreground capitalize font-mono">{user.role.replace("_", " ")}</p>
                 </div>
               </div>
-              <ThemeToggle />
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">Theme</span>
+                <ThemeToggle />
+              </div>
             </div>
           )}
           <button
