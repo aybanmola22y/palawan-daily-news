@@ -166,7 +166,7 @@ export async function getArticles(includeDeleted: boolean = false): Promise<Stor
   if (isSupabaseConfigured) {
     let query = supabase
       .from("articles")
-      .select("*, categories(name, slug), profiles(name, avatar_url)");
+      .select("*, categories(name, slug)");
     
     if (!includeDeleted) {
       query = query.is("deleted_at", null);
@@ -228,7 +228,7 @@ export async function getArticleBySlug(slug: string) {
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from("articles")
-      .select("*, categories(name, slug), profiles(name, avatar_url)")
+      .select("*, categories(name, slug)")
       .eq("slug", slug)
       .single();
     
@@ -396,7 +396,7 @@ export async function getDeletedArticles(): Promise<StoredArticle[]> {
     // Fetch from the physical trash table
     const { data, error } = await supabaseAdmin
       .from("trash_articles")
-      .select("*, categories(name, slug), profiles(name, avatar_url)")
+      .select("*, categories(name, slug)")
       .order("deleted_at", { ascending: false });
     
     if (!error && data) return data.map(fromSupabase);

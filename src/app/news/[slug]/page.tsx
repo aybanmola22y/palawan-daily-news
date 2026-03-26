@@ -118,8 +118,12 @@ export default async function ArticlePage({ params }: Props) {
             {/* Meta */}
             <div className="flex flex-wrap items-center gap-4 mb-6 py-4 border-t border-b border-gray-200">
               <div className="flex items-center gap-2">
-                <div className="relative h-10 w-10 rounded-full overflow-hidden">
-                  <Image src={article.authorAvatar} alt={article.authorName} fill className="object-cover" />
+                <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  {article.authorAvatar ? (
+                    <Image src={article.authorAvatar} alt={article.authorName} fill className="object-cover" />
+                  ) : (
+                    <span className="text-gray-500 text-xs font-bold">{article.authorName?.charAt(0) ?? "A"}</span>
+                  )}
                 </div>
                 <div>
                   <p className="font-semibold text-sm text-gray-900">{article.authorName}</p>
@@ -140,15 +144,17 @@ export default async function ArticlePage({ params }: Props) {
             </div>
 
             {/* Featured Image */}
-            <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden mb-8">
-              <Image
-                src={article.featuredImage}
-                alt={article.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
+            {article.featuredImage && (
+              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden mb-8">
+                <Image
+                  src={article.featuredImage}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            )}
 
             {/* Share buttons */}
             <ShareButtons title={article.title} />
