@@ -97,12 +97,12 @@ export async function saveAds(ads: Advertisement[]): Promise<boolean> {
 
 export async function getAdById(id: string): Promise<Advertisement | undefined> {
     const ads = await getAds();
-    return ads.find((ad) => ad.id === id);
+    return ads.find((ad) => String(ad.id) === String(id));
 }
 
 export async function updateAd(id: string, updates: Partial<Advertisement>): Promise<boolean> {
     const ads = await getAds();
-    const index = ads.findIndex((ad) => ad.id === id);
+    const index = ads.findIndex((ad) => String(ad.id) === String(id));
     if (index === -1) return false;
 
     ads[index] = { ...ads[index], ...updates };
@@ -111,7 +111,7 @@ export async function updateAd(id: string, updates: Partial<Advertisement>): Pro
 
 export async function deleteAd(id: string): Promise<boolean> {
     const ads = await getAds();
-    const filtered = ads.filter((ad) => ad.id !== id);
+    const filtered = ads.filter((ad) => String(ad.id) !== String(id));
     if (filtered.length === ads.length) return false;
     return await saveAds(filtered);
 }

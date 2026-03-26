@@ -147,13 +147,18 @@ export default function NewArticlePage() {
               Save Draft
             </button>
             <button
-              onClick={() => handleSave("pending_review")}
+              onClick={() => handleSave(form.status === "draft" ? "pending_review" : form.status)}
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm min-w-[160px] justify-center"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              {saving ? "Creating..." : "Submit Article"}
+              {saving ? "Processing..." : (
+                form.status === "scheduled" ? "Schedule Article" : 
+                form.status === "published" ? "Publish Now" : 
+                "Submit Article"
+              )}
             </button>
+
           </div>
         </div>
 

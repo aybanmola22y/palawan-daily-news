@@ -11,9 +11,15 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
 
-  let articles = await getArticlesForFrontend();
+  let articles;
+  if (status === "deleted") {
+    const { getDeletedArticles } = await import("@/lib/articles-service");
+    articles = await getDeletedArticles();
+  } else {
+    articles = await getArticlesForFrontend();
+  }
 
-  if (status) {
+  if (status && status !== "deleted") {
     articles = articles.filter((a) => a.status === status);
   }
   if (category) {

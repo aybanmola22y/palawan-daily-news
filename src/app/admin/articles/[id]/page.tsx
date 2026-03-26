@@ -237,12 +237,23 @@ export default function EditArticlePage() {
               Save Draft
             </button>
             <button
-              onClick={() => handleSave("published")}
+              onClick={() => handleSave(form.status)}
               disabled={saving}
-              className="flex items-center gap-6 py-2 px-6 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              className="flex items-center justify-center py-2 px-6 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm min-w-[140px]"
             >
-              {saving ? "Updating..." : "Update Story"}
+              {saving ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Updating...</span>
+                </div>
+              ) : (
+                form.status === "scheduled" ? "Schedule Story" : 
+                form.status === "published" ? "Publish Story" : 
+                form.status === "draft" ? "Save Draft" :
+                "Update Story"
+              )}
             </button>
+
           </div>
         </div>
 

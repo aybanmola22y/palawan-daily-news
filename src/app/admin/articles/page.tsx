@@ -32,13 +32,22 @@ export default async function ArticlesPage() {
             <h1 className="text-xl font-bold text-foreground">Articles</h1>
             <p className="text-sm text-muted-foreground">Manage all news articles</p>
           </div>
-          <Link
-            href="/admin/articles/new"
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <PlusCircle className="h-4 w-4" />
-            New Article
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/articles/trash"
+              className="flex items-center gap-2 px-4 py-2 border border-border text-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors"
+            >
+              Trash
+            </Link>
+            <Link
+              href="/admin/articles/new"
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <PlusCircle className="h-4 w-4" />
+              New Article
+            </Link>
+          </div>
+
         </div>
 
         <ArticlesTableClient articles={articles} />

@@ -240,7 +240,7 @@ export const mockArticles = [
     <p>The show, recorded from a makeshift studio inside a classroom, tackles topics such as climate anxiety, study hacks, and stories of young volunteers working in coastal clean‑ups and literacy programs.</p>
     <h2>Local Stories, Youth Perspective</h2>
     <p>Teachers say the project has boosted students' confidence and digital skills, while barangay officials are exploring ways to air selected episodes on community radio.</p>`,
-    featuredImage: "https://images.unsplash.com/photo-1512427691650-1e0c2f9a81b3?w=800&h=400&fit=crop",
+    featuredImage: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&h=400&fit=crop",
     categoryId: 17,
     categoryName: "Youth & Campus",
     categorySlug: "youth-campus",

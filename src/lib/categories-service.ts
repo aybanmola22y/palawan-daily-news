@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { mockCategories } from "./mock-data";
 import { getArticles } from "./articles-service";
+import { supabase, isSupabaseConfigured } from "./supabase";
 
 export interface StoredCategory {
   id: number;
@@ -10,6 +11,16 @@ export interface StoredCategory {
   description: string;
   color: string;
   articleCount?: number;
+}
+
+function fromSupabase(row: any): StoredCategory {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description || "",
+    color: row.color || "blue",
+  };
 }
 
 const DATA_FILE = path.join(process.cwd(), "src/data/categories.json");
@@ -53,7 +64,19 @@ async function saveCategories(categories: StoredCategory[]): Promise<boolean> {
 }
 
 export async function getCategories(): Promise<StoredCategory[]> {
-  const categories = await ensureDataFile();
+  let categories: StoredCategory[] = [];
+
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from("categories").select("*").order("name");
+    if (!error && data) {
+      categories = data.map(fromSupabase);
+    }
+  }
+
+  if (categories.length === 0) {
+    categories = await ensureDataFile();
+  }
+
   const articles = await getArticles();
 
   // Calculate article counts dynamically
@@ -64,6 +87,22 @@ export async function getCategories(): Promise<StoredCategory[]> {
 }
 
 export async function createCategory(input: Partial<StoredCategory>): Promise<StoredCategory | null> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("categories")
+      .insert({
+        name: input.name,
+        slug: input.slug,
+        description: input.description,
+        color: input.color,
+      })
+      .select()
+      .single();
+    
+    if (!error && data) return fromSupabase(data);
+    if (error) console.error("Supabase createCategory error:", error);
+  }
+
   const categories = await ensureDataFile();
   const maxId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) : 0;
   const newCat: StoredCategory = {
@@ -78,17 +117,39 @@ export async function createCategory(input: Partial<StoredCategory>): Promise<St
   return ok ? newCat : null;
 }
 
-export async function updateCategory(id: number, updates: Partial<StoredCategory>): Promise<boolean> {
+export async function updateCategory(id: number | string, updates: Partial<StoredCategory>): Promise<boolean> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase
+      .from("categories")
+      .update({
+        name: updates.name,
+        slug: updates.slug,
+        description: updates.description,
+        color: updates.color,
+      })
+      .eq("id", id);
+    if (!error) return true;
+    console.error("Supabase updateCategory error:", error);
+    return false;
+  }
+
   const categories = await ensureDataFile();
-  const idx = categories.findIndex(c => c.id === id);
+  const idx = categories.findIndex(c => String(c.id) === String(id));
   if (idx === -1) return false;
   categories[idx] = { ...categories[idx], ...updates };
   return await saveCategories(categories);
 }
 
-export async function deleteCategory(id: number): Promise<boolean> {
+export async function deleteCategory(id: number | string): Promise<boolean> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from("categories").delete().eq("id", id);
+    if (!error) return true;
+    console.error("Supabase deleteCategory error:", error);
+    return false;
+  }
+
   const categories = await ensureDataFile();
-  const next = categories.filter(c => c.id !== id);
+  const next = categories.filter(c => String(c.id) !== String(id));
   if (next.length === categories.length) return false;
   return await saveCategories(next);
 }

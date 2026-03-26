@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 import { cookies } from "next/headers";
 
 
+import { supabase, isSupabaseConfigured } from "./supabase";
+
 const JWT_SECRET = process.env.JWT_SECRET || "palawan-daily-news-secret-2024";
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
 
@@ -18,11 +20,10 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
-// Placeholder for Supabase auth or database logic
-// TODO: Implement Supabase session management
-export async function createSession(userId: number): Promise<string> {
+export async function createSession(userId: string | number): Promise<string> {
   const sessionId = uuidv4();
-  // const { data, error } = await supabase.from('sessions').insert({ id: sessionId, user_id: userId, expires_at: ... })
+  // If Supabase is configured, you'd typically use supabase.auth.signInWithPassword
+  // and manage the session via their helpers. For now, we return a local ID.
   return sessionId;
 }
 
@@ -32,13 +33,27 @@ export async function getSession() {
 
   if (!sessionId) return null;
 
-  // Placeholder for Supabase query
-  // const { data: session } = await supabase.from('sessions').select('*, user:users(*)').eq('id', sessionId).single()
+  if (isSupabaseConfigured) {
+    try {
+      // Basic check: if you use Supabase Auth, you'd get the user like this:
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!error && user) {
+        return {
+          id: user.id,
+          name: user.user_metadata?.full_name || user.email?.split('@')[0],
+          email: user.email,
+          role: user.user_metadata?.role || "writer"
+        };
+      }
+    } catch (e) {
+      console.error("Supabase getSession error:", e);
+    }
+  }
   
-  // Return a mock user for now to prevent breaking the UI if needed, 
-  // or return null if you want to force login.
+  // Return null if no session found (local or Supabase)
   return null;
 }
+
 
 export async function deleteSession() {
   const cookieStore = await cookies();

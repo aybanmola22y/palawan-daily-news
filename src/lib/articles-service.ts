@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { mockArticles } from "./mock-data";
+import { supabase, isSupabaseConfigured } from "./supabase";
 
 export interface StoredArticle {
   id: number;
@@ -20,6 +21,9 @@ export interface StoredArticle {
   views: number;
   publishedAt: string;
   tags: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  deletedAt?: string | null;
 }
 
 const DATA_FILE = path.join(process.cwd(), "src/data/articles.json");
@@ -41,6 +45,29 @@ function fromStored(article: StoredArticle) {
   return {
     ...article,
     publishedAt: new Date(article.publishedAt),
+  };
+}
+
+function fromSupabase(row: any): StoredArticle {
+  return {
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    excerpt: row.excerpt,
+    content: row.content,
+    featuredImage: row.featured_image,
+    categoryId: row.category_id,
+    categoryName: row.categories?.name || "",
+    categorySlug: row.categories?.slug || "",
+    authorName: row.author_name || (row.profiles?.name) || "Staff",
+    authorAvatar: row.author_avatar || (row.profiles?.avatar_url) || "",
+    status: row.status,
+    featured: row.featured,
+    breaking: row.breaking,
+    views: row.views,
+    publishedAt: row.published_at,
+    tags: row.tags || [],
+    deletedAt: row.deleted_at,
   };
 }
 
@@ -135,8 +162,27 @@ async function saveArticles(articles: StoredArticle[]): Promise<boolean> {
   }
 }
 
-export async function getArticles(): Promise<StoredArticle[]> {
+export async function getArticles(includeDeleted: boolean = false): Promise<StoredArticle[]> {
+  if (isSupabaseConfigured) {
+    let query = supabase
+      .from("articles")
+      .select("*, categories(name, slug), profiles(name, avatar_url)");
+    
+    if (!includeDeleted) {
+      query = query.is("deleted_at", null);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
+    
+    if (!error && data) {
+      return data.map(fromSupabase);
+    }
+  }
+
   const articles = await ensureDataFile();
+  if (!includeDeleted) {
+    return articles.filter(a => !a.deletedAt);
+  }
   return articles;
 }
 
@@ -179,6 +225,22 @@ export async function getArticleById(id: number) {
 }
 
 export async function getArticleBySlug(slug: string) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*, categories(name, slug), profiles(name, avatar_url)")
+      .eq("slug", slug)
+      .single();
+    
+    if (!error && data) {
+      const article = fromSupabase(data);
+      if (article.status === "scheduled" && new Date(article.publishedAt) > new Date()) {
+        return null;
+      }
+      return fromStored(article);
+    }
+  }
+
   const articles = await getArticles();
   const found = articles.find((a) => a.slug === slug);
   if (!found) return null;
@@ -192,6 +254,33 @@ export async function getArticleBySlug(slug: string) {
 }
 
 export async function createArticle(input: Partial<StoredArticle>): Promise<StoredArticle | null> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .insert({
+        title: input.title,
+        slug: input.slug,
+        excerpt: input.excerpt,
+        content: input.content,
+        featured_image: input.featuredImage,
+        category_id: input.categoryId,
+        status: input.status,
+        featured: input.featured,
+        breaking: input.breaking,
+        published_at: input.publishedAt,
+        tags: input.tags,
+        author_name: input.authorName,
+        author_avatar: input.authorAvatar,
+      })
+      .select()
+      .single();
+    
+    if (!error && data) {
+      return fromSupabase(data);
+    }
+    if (error) console.error("Supabase createArticle error:", error);
+  }
+
   const articles = await getArticles();
   const maxId = articles.length > 0 ? Math.max(...articles.map((a) => a.id)) : 0;
   // Enforce a single featured article.
@@ -216,15 +305,42 @@ export async function createArticle(input: Partial<StoredArticle>): Promise<Stor
     views: input.views ?? 0,
     publishedAt: input.publishedAt ?? new Date().toISOString(),
     tags: Array.isArray(input.tags) ? input.tags : (typeof input.tags === "string" ? (input.tags as string).split(",").map((t) => t.trim()).filter(Boolean) : []),
+    seoTitle: input.seoTitle ?? "",
+    seoDescription: input.seoDescription ?? "",
   };
   articles.push(newArticle);
   const ok = await saveArticles(articles);
   return ok ? newArticle : null;
 }
 
-export async function updateArticle(id: number, updates: Partial<StoredArticle>): Promise<boolean> {
+export async function updateArticle(id: number | string, updates: Partial<StoredArticle>): Promise<boolean> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase
+      .from("articles")
+      .update({
+        title: updates.title,
+        slug: updates.slug,
+        excerpt: updates.excerpt,
+        content: updates.content,
+        featured_image: updates.featuredImage,
+        category_id: updates.categoryId,
+        status: updates.status,
+        featured: updates.featured,
+        breaking: updates.breaking,
+        published_at: updates.publishedAt,
+        tags: updates.tags,
+        author_name: updates.authorName,
+        author_avatar: updates.authorAvatar,
+      })
+      .eq("id", id);
+    
+    if (!error) return true;
+    console.error("Supabase updateArticle error:", error);
+    return false;
+  }
+
   const articles = await getArticles();
-  const idx = articles.findIndex((a) => a.id === id);
+  const idx = articles.findIndex((a) => String(a.id) === String(id));
   if (idx === -1) return false;
 
   // Enforce a single featured article.
@@ -244,13 +360,72 @@ export async function updateArticle(id: number, updates: Partial<StoredArticle>)
   } else if (typeof updates.tags === "string") {
     (updated as StoredArticle).tags = (updates.tags as string).split(",").map((t) => t.trim()).filter(Boolean);
   }
+  if (updates.seoTitle !== undefined) (updated as StoredArticle).seoTitle = updates.seoTitle;
+  if (updates.seoDescription !== undefined) (updated as StoredArticle).seoDescription = updates.seoDescription;
+
   articles[idx] = updated as StoredArticle;
   return await saveArticles(articles);
 }
 
-export async function deleteArticle(id: number): Promise<boolean> {
-  const articles = await getArticles();
-  const next = articles.filter((a) => a.id !== id);
+export async function deleteArticle(id: number | string): Promise<boolean> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase
+      .from("articles")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id);
+    if (!error) return true;
+    console.error("Supabase deleteArticle (soft) error:", error);
+    return false;
+  }
+
+  const articles = await ensureDataFile();
+  const idx = articles.findIndex((a) => String(a.id) === String(id));
+  if (idx === -1) return false;
+  articles[idx].deletedAt = new Date().toISOString();
+  return await saveArticles(articles);
+}
+
+export async function getDeletedArticles(): Promise<StoredArticle[]> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*, categories(name, slug), profiles(name, avatar_url)")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false });
+    
+    if (!error && data) return data.map(fromSupabase);
+  }
+
+  const articles = await ensureDataFile();
+  return articles.filter(a => !!a.deletedAt);
+}
+
+export async function restoreArticle(id: number | string): Promise<boolean> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase
+      .from("articles")
+      .update({ deleted_at: null })
+      .eq("id", id);
+    if (!error) return true;
+    return false;
+  }
+
+  const articles = await ensureDataFile();
+  const idx = articles.findIndex((a) => String(a.id) === String(id));
+  if (idx === -1) return false;
+  articles[idx].deletedAt = null;
+  return await saveArticles(articles);
+}
+
+export async function permanentlyDeleteArticle(id: number | string): Promise<boolean> {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from("articles").delete().eq("id", id);
+    if (!error) return true;
+    return false;
+  }
+
+  const articles = await ensureDataFile();
+  const next = articles.filter((a) => String(a.id) !== String(id));
   if (next.length === articles.length) return false;
   return await saveArticles(next);
 }

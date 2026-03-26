@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, FileText, Tag, FolderOpen, Users,
-  LogOut, Menu, X, ChevronRight, Settings, PlusCircle, Megaphone
+  LogOut, Menu, X, ChevronRight, Settings, PlusCircle, Megaphone, Trash2
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const nav = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "All Articles", href: "/admin/articles", icon: FileText },
+  { label: "Trash", href: "/admin/articles/trash", icon: Trash2 },
   { label: "New Article", href: "/admin/articles/new", icon: PlusCircle },
   { label: "Categories", href: "/admin/categories", icon: FolderOpen },
   { label: "Advertisements", href: "/admin/ads", icon: Megaphone },

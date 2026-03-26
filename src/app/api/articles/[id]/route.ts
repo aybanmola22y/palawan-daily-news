@@ -71,7 +71,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: idParam } = await params;
@@ -80,9 +80,20 @@ export async function DELETE(
     return NextResponse.json({ error: "Invalid article ID" }, { status: 400 });
   }
 
-  const success = await deleteArticle(id);
+  const { searchParams } = new URL(request.url);
+  const permanent = searchParams.get("permanent") === "true";
+
+  let success;
+  if (permanent) {
+    const { permanentlyDeleteArticle } = await import("@/lib/articles-service");
+    success = await permanentlyDeleteArticle(id);
+  } else {
+    success = await deleteArticle(id);
+  }
+
   if (!success) {
     return NextResponse.json({ error: "Failed to delete article" }, { status: 400 });
   }
   return NextResponse.json({ success: true });
 }
+

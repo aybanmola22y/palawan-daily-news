@@ -216,11 +216,18 @@ export default function ArticlesTableClient({ articles }: { articles: ArticleRow
                 </tr>
               ) : (
                 paginatedArticles.map((article) => {
-                  const statusMeta = statusConfig[article.status] ?? {
-                    label: article.status,
+                  const isScheduledButLive = 
+                    article.status === 'scheduled' && 
+                    new Date(article.publishedAt) <= new Date();
+                  
+                  const displayStatus = isScheduledButLive ? 'published' : article.status;
+                  
+                  const statusMeta = statusConfig[displayStatus] ?? {
+                    label: displayStatus,
                     className: "bg-muted text-muted-foreground",
                     icon: <Clock className="h-3 w-3" />,
                   };
+
                   return (
                     <tr key={article.id} className="hover:bg-muted/30 transition-colors group">
                       <td className="px-6 py-4">
