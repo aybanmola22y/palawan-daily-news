@@ -60,7 +60,7 @@ function fromSupabase(row: any): StoredArticle {
     categoryName: row.categories?.name || "",
     categorySlug: row.categories?.slug || "",
     authorName: row.author_name || (row.profiles?.name) || "Staff",
-    authorAvatar: row.author_avatar || (row.profiles?.avatar_url) || "",
+    authorAvatar: row.author_avatar || (row.profiles?.avatar_url) || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
     status: row.status,
     featured: row.featured,
     breaking: row.breaking,

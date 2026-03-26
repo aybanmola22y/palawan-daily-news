@@ -15,6 +15,7 @@ interface ArticleCardProps {
 }
 
 const DEFAULT_ARTICLE_IMAGE = "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&h=400&fit=crop";
+const DEFAULT_AUTHOR_AVATAR = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop";
 
 const CATEGORY_VARIANT_MAP: Record<string, any> = {
   "city-news": "cat-emerald",
@@ -77,7 +78,12 @@ export default function ArticleCard({ article, variant = "default", className }:
           <div className="flex items-center gap-4 text-sm text-gray-400">
             <div className="flex items-center gap-1.5">
               <div className="relative h-6 w-6 rounded-full overflow-hidden">
-                <Image src={article.authorAvatar} alt={article.authorName} fill className="object-cover" />
+                <Image 
+                  src={article.authorAvatar || DEFAULT_AUTHOR_AVATAR} 
+                  alt={article.authorName} 
+                  fill 
+                  className="object-cover" 
+                />
               </div>
               <span>{article.authorName}</span>
             </div>
