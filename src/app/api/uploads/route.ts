@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase";
 import crypto from "crypto";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED = new Set(["image/png", "image/jpeg", "image/webp"]);
 
@@ -31,18 +29,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "File too large (max 10MB)" }, { status: 400 });
     }
 
-    if (!fs.existsSync(UPLOAD_DIR)) {
-      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    const ext = safeExt(file.type);
+    const filename = `${crypto.randomUUID()}${ext}`;
+    const buffer = await file.arrayBuffer();
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabaseAdmin.storage
+      .from("uploads")
+      .upload(filename, buffer, {
+        contentType: file.type,
+        cacheControl: "3600",
+        upsert: false
+      });
+
+    if (error) {
+      console.error("Supabase Storage Error:", error);
+      return NextResponse.json({ error: "Upload failed to storage" }, { status: 500 });
     }
 
-    const ext = safeExt(file.type);
-    const filename = `${crypto.randomUUID()}${ext || path.extname(file.name) || ""}`;
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    fs.writeFileSync(path.join(UPLOAD_DIR, filename), bytes);
+    // Get Public URL
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from("uploads")
+      .getPublicUrl(filename);
 
-    return NextResponse.json({ url: `/uploads/${filename}` });
-  } catch {
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ url: publicUrl });
+  } catch (error) {
+    console.error("Upload Route Error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
