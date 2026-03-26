@@ -278,43 +278,43 @@ export async function createArticle(input: Partial<StoredArticle>): Promise<Stor
     if (!error && data) {
       return fromSupabase(data);
     }
-    if (error) {
-      console.error("Supabase createArticle error:", error);
-      return null;
-    }
-  } else {
-    const articles = await getArticles();
-    const maxId = articles.length > 0 ? Math.max(...articles.map((a) => a.id)) : 0;
-    // Enforce a single featured article.
-    if (input.featured === true) {
-      for (const a of articles) a.featured = false;
-    }
-    const newArticle: StoredArticle = {
-      id: maxId + 1,
-      title: input.title ?? "",
-      slug: input.slug ?? "",
-      excerpt: input.excerpt ?? "",
-      content: input.content ?? "",
-      featuredImage: input.featuredImage ?? "",
-      categoryId: input.categoryId ?? 1,
-      categoryName: input.categoryName ?? "",
-      categorySlug: input.categorySlug ?? "",
-      authorName: input.authorName ?? "Staff",
-      authorAvatar: input.authorAvatar ?? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-      status: input.status ?? "draft",
-      featured: input.featured ?? false,
-      breaking: input.breaking ?? false,
-      views: input.views ?? 0,
-      publishedAt: input.publishedAt ?? new Date().toISOString(),
-      tags: Array.isArray(input.tags) ? input.tags : (typeof input.tags === "string" ? (input.tags as string).split(",").map((t) => t.trim()).filter(Boolean) : []),
-      seoTitle: input.seoTitle ?? "",
-      seoDescription: input.seoDescription ?? "",
-    };
-    articles.push(newArticle);
-    const ok = await saveArticles(articles);
-    return ok ? newArticle : null;
+    console.error("Supabase createArticle error:", error);
+    // Return null — do NOT fall through to the JSON file writer.
+    // On Vercel the filesystem is read-only and would crash if we tried.
+    return null;
   }
-  return null;
+
+  // Local JSON fallback — only used when Supabase is NOT configured at all
+  const articles = await getArticles();
+  const maxId = articles.length > 0 ? Math.max(...articles.map((a) => a.id)) : 0;
+  // Enforce a single featured article.
+  if (input.featured === true) {
+    for (const a of articles) a.featured = false;
+  }
+  const newArticle: StoredArticle = {
+    id: maxId + 1,
+    title: input.title ?? "",
+    slug: input.slug ?? "",
+    excerpt: input.excerpt ?? "",
+    content: input.content ?? "",
+    featuredImage: input.featuredImage ?? "",
+    categoryId: input.categoryId ?? 1,
+    categoryName: input.categoryName ?? "",
+    categorySlug: input.categorySlug ?? "",
+    authorName: input.authorName ?? "Staff",
+    authorAvatar: input.authorAvatar ?? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    status: input.status ?? "draft",
+    featured: input.featured ?? false,
+    breaking: input.breaking ?? false,
+    views: input.views ?? 0,
+    publishedAt: input.publishedAt ?? new Date().toISOString(),
+    tags: Array.isArray(input.tags) ? input.tags : (typeof input.tags === "string" ? (input.tags as string).split(",").map((t) => t.trim()).filter(Boolean) : []),
+    seoTitle: input.seoTitle ?? "",
+    seoDescription: input.seoDescription ?? "",
+  };
+  articles.push(newArticle);
+  const ok = await saveArticles(articles);
+  return ok ? newArticle : null;
 }
 
 export async function updateArticle(id: number | string, updates: Partial<StoredArticle>): Promise<boolean> {
@@ -338,40 +338,37 @@ export async function updateArticle(id: number | string, updates: Partial<Stored
       })
       .eq("id", id);
     
-    if (error) {
-      console.error("Supabase updateArticle error:", error);
-      return false;
-    }
-    return true;
-  } else {
-    const articles = await getArticles();
-    const idx = articles.findIndex((a) => String(a.id) === String(id));
-    if (idx === -1) return false;
-
-    // Enforce a single featured article.
-    if (updates.featured === true) {
-      for (const a of articles) {
-        if (a.id !== id) a.featured = false;
-      }
-    }
-
-    const updated = { ...articles[idx], ...updates };
-    const pubAt = updates.publishedAt;
-    if (pubAt != null && typeof pubAt === "object" && "toISOString" in pubAt) {
-      (updated as StoredArticle).publishedAt = (pubAt as Date).toISOString();
-    }
-    if (Array.isArray(updates.tags)) {
-      (updated as StoredArticle).tags = updates.tags;
-    } else if (typeof updates.tags === "string") {
-      (updated as StoredArticle).tags = (updates.tags as string).split(",").map((t) => t.trim()).filter(Boolean);
-    }
-    if (updates.seoTitle !== undefined) (updated as StoredArticle).seoTitle = updates.seoTitle;
-    if (updates.seoDescription !== undefined) (updated as StoredArticle).seoDescription = updates.seoDescription;
-
-    articles[idx] = updated as StoredArticle;
-    return await saveArticles(articles);
+    if (!error) return true;
+    console.error("Supabase updateArticle error:", error);
+    return false;
   }
-  return false;
+
+  const articles = await getArticles();
+  const idx = articles.findIndex((a) => String(a.id) === String(id));
+  if (idx === -1) return false;
+
+  // Enforce a single featured article.
+  if (updates.featured === true) {
+    for (const a of articles) {
+      if (a.id !== id) a.featured = false;
+    }
+  }
+
+  const updated = { ...articles[idx], ...updates };
+  const pubAt = updates.publishedAt;
+  if (pubAt != null && typeof pubAt === "object" && "toISOString" in pubAt) {
+    (updated as StoredArticle).publishedAt = (pubAt as Date).toISOString();
+  }
+  if (Array.isArray(updates.tags)) {
+    (updated as StoredArticle).tags = updates.tags;
+  } else if (typeof updates.tags === "string") {
+    (updated as StoredArticle).tags = (updates.tags as string).split(",").map((t) => t.trim()).filter(Boolean);
+  }
+  if (updates.seoTitle !== undefined) (updated as StoredArticle).seoTitle = updates.seoTitle;
+  if (updates.seoDescription !== undefined) (updated as StoredArticle).seoDescription = updates.seoDescription;
+
+  articles[idx] = updated as StoredArticle;
+  return await saveArticles(articles);
 }
 
 export async function deleteArticle(id: number | string): Promise<boolean> {
@@ -382,18 +379,16 @@ export async function deleteArticle(id: number | string): Promise<boolean> {
       .from("articles")
       .delete()
       .eq("id", id);
-    if (error) {
-      console.error("Supabase deleteArticle (physical move to trash) error:", error);
-      return false;
-    }
-    return true;
-  } else {
-    const articles = await ensureDataFile();
-    const idx = articles.findIndex((a) => String(a.id) === String(id));
-    if (idx === -1) return false;
-    articles[idx].deletedAt = new Date().toISOString();
-    return await saveArticles(articles);
+    if (!error) return true;
+    console.error("Supabase deleteArticle (physical move to trash) error:", error);
+    return false;
   }
+
+  const articles = await ensureDataFile();
+  const idx = articles.findIndex((a) => String(a.id) === String(id));
+  if (idx === -1) return false;
+  articles[idx].deletedAt = new Date().toISOString();
+  return await saveArticles(articles);
 }
 
 export async function getDeletedArticles(): Promise<StoredArticle[]> {
