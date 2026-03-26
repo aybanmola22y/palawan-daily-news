@@ -118,9 +118,21 @@ create policy "Allow public read-only access for ads" on ads for select using (a
 create policy "Allow public read-only access for settings" on settings for select using (true);
 
 -- Admin full access (to be refined with actual roles)
-create policy "Allow everything for authenticated users" on categories for all using (auth.role() = 'authenticated');
-create policy "Allow everything for authenticated users" on profiles for all using (auth.role() = 'authenticated');
-create policy "Allow everything for authenticated users" on articles for all using (auth.role() = 'authenticated');
-create policy "Allow everything for authenticated users" on tags for all using (auth.role() = 'authenticated');
-create policy "Allow everything for authenticated users" on ads for all using (auth.role() = 'authenticated');
-create policy "Allow everything for authenticated users" on settings for all using (auth.role() = 'authenticated');
+-- Admin/Editor full access
+create policy "Allow admins and editors to manage categories" on categories for all 
+  using (exists (select 1 from profiles where id = auth.uid() and role in ('super_admin', 'editor')));
+
+create policy "Allow admins and editors to manage articles" on articles for all 
+  using (exists (select 1 from profiles where id = auth.uid() and role in ('super_admin', 'editor')));
+
+create policy "Allow admins and editors to manage tags" on tags for all 
+  using (exists (select 1 from profiles where id = auth.uid() and role in ('super_admin', 'editor')));
+
+create policy "Allow admins and editors to manage ads" on ads for all 
+  using (exists (select 1 from profiles where id = auth.uid() and role in ('super_admin', 'editor')));
+
+create policy "Allow admins to manage settings" on settings for all 
+  using (exists (select 1 from profiles where id = auth.uid() and role = 'super_admin'));
+
+create policy "Users can manage their own profiles" on profiles for all 
+  using (auth.uid() = id);

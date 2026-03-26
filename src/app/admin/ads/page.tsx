@@ -9,19 +9,12 @@ import { getAds } from "@/lib/ads-service";
 import AdsTableClient from "@/components/admin/AdsTableClient";
 
 export default async function AdminAdsPage() {
-    let user = null;
-    try {
-        user = await getSession();
-    } catch {
-        // DB not ready, use demo mode
-    }
-
+    const user = await getSession();
     const ads = await getAds();
-    const demoUser = user || { name: "Demo Admin", email: "admin@palawandaily.com", role: "super_admin" };
 
     return (
         <div className="flex min-h-screen bg-gray-50">
-            <AdminSidebar user={demoUser as { name: string; email: string; role: string }} />
+            <AdminSidebar user={user as any} />
 
             <main className="flex-1 overflow-auto">
                 {/* Header */}

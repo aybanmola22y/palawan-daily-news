@@ -29,13 +29,13 @@ export async function createSession(userId: string | number): Promise<string> {
 
 export async function getSession() {
   const cookieStore = await cookies();
-  const sessionId = cookieStore.get("session")?.value;
+  const sessionCookie = cookieStore.get("session")?.value;
 
-  if (!sessionId) return null;
+  if (!sessionCookie) return null;
 
+  // 1. Check Supabase if configured
   if (isSupabaseConfigured) {
     try {
-      // Basic check: if you use Supabase Auth, you'd get the user like this:
       const { data: { user }, error } = await supabase.auth.getUser();
       if (!error && user) {
         return {
@@ -50,7 +50,17 @@ export async function getSession() {
     }
   }
   
-  // Return null if no session found (local or Supabase)
+  // 2. Fallback to Mock Session (Base64 JSON)
+  try {
+    const decoded = Buffer.from(sessionCookie, "base64").toString("utf-8");
+    const user = JSON.parse(decoded);
+    if (user && user.id && user.email) {
+      return user;
+    }
+  } catch {
+    // Treat invalid cookie as no session
+  }
+
   return null;
 }
 

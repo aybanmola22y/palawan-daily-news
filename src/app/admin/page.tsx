@@ -30,18 +30,12 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 import { mockOrgChartEmployees } from "@/lib/mock-data";
 
 export default async function AdminDashboard() {
-  let user = null;
-  try {
-    user = await getSession();
-  } catch {
-    // DB not ready, use demo mode
-  }
+  const user = await getSession();
 
-  if (user === undefined) {
+  // Redirect if not authenticated (extra safety, though Layout handles it)
+  if (!user) {
     redirect("/admin/login");
   }
-
-  const demoUser = user || { name: "Demo Admin", email: "admin@palawandaily.com", role: "super_admin" };
 
   const allArticles = await getArticlesForFrontend();
   const mockStats = {
@@ -61,14 +55,14 @@ export default async function AdminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <AdminSidebar user={demoUser as { name: string; email: string; role: string }} />
+      <AdminSidebar user={user as { name: string; email: string; role: string }} />
 
       <main className="flex-1 overflow-auto">
         {/* Header */}
         <div className="bg-card border-b border-border px-8 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Welcome back, {demoUser.name}</p>
+            <p className="text-sm text-muted-foreground">Welcome back, {user?.name || "User"}</p>
           </div>
           <Link
             href="/admin/articles/new"

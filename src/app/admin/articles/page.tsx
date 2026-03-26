@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getSession } from "@/lib/auth";
+
 export const dynamic = "force-dynamic";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { getArticlesForFrontend } from "@/lib/articles-service";
@@ -6,9 +8,12 @@ import { PlusCircle } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import ArticlesTableClient from "@/components/admin/ArticlesTableClient";
 
-const demoUser = { name: "Demo Admin", email: "admin@palawandaily.com", role: "super_admin" };
+// Protected by AdminLayout
+
 
 export default async function ArticlesPage() {
+  const user = await getSession();
+
   const raw = await getArticlesForFrontend();
   const articles = raw.map((a) => ({
     id: a.id,
@@ -25,7 +30,8 @@ export default async function ArticlesPage() {
   }));
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <AdminSidebar user={demoUser} />
+      <AdminSidebar user={user as any} />
+
       <main className="flex-1 overflow-auto">
         <div className="bg-card border-b border-border px-8 py-4 flex items-center justify-between">
           <div>

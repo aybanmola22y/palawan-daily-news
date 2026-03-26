@@ -10,6 +10,8 @@ import { getAds } from "@/lib/ads-service";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/utils/security";
+
 import { Clock, Eye } from "lucide-react";
 import { AdPlaceholder } from "@/components/public/AdPlaceholder";
 import ShareButtons from "@/components/public/ShareButtons";
@@ -154,7 +156,7 @@ export default async function ArticlePage({ params }: Props) {
             {/* Article content */}
             <div
               className="article-content prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
             />
 
             {/* Tags */}
