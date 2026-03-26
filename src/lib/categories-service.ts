@@ -100,21 +100,25 @@ export async function createCategory(input: Partial<StoredCategory>): Promise<St
       .single();
     
     if (!error && data) return fromSupabase(data);
-    if (error) console.error("Supabase createCategory error:", error);
+    if (error) {
+      console.error("Supabase createCategory error:", error);
+      return null;
+    }
+  } else {
+    const categories = await ensureDataFile();
+    const maxId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) : 0;
+    const newCat: StoredCategory = {
+      id: maxId + 1,
+      name: input.name ?? "",
+      slug: input.slug ?? "",
+      description: input.description ?? "",
+      color: input.color ?? "blue",
+    };
+    categories.push(newCat);
+    const ok = await saveCategories(categories);
+    return ok ? newCat : null;
   }
-
-  const categories = await ensureDataFile();
-  const maxId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) : 0;
-  const newCat: StoredCategory = {
-    id: maxId + 1,
-    name: input.name ?? "",
-    slug: input.slug ?? "",
-    description: input.description ?? "",
-    color: input.color ?? "blue",
-  };
-  categories.push(newCat);
-  const ok = await saveCategories(categories);
-  return ok ? newCat : null;
+  return null;
 }
 
 export async function updateCategory(id: number | string, updates: Partial<StoredCategory>): Promise<boolean> {
@@ -128,28 +132,32 @@ export async function updateCategory(id: number | string, updates: Partial<Store
         color: updates.color,
       })
       .eq("id", id);
-    if (!error) return true;
-    console.error("Supabase updateCategory error:", error);
-    return false;
+    if (error) {
+      console.error("Supabase updateCategory error:", error);
+      return false;
+    }
+    return true;
+  } else {
+    const categories = await ensureDataFile();
+    const idx = categories.findIndex(c => String(c.id) === String(id));
+    if (idx === -1) return false;
+    categories[idx] = { ...categories[idx], ...updates };
+    return await saveCategories(categories);
   }
-
-  const categories = await ensureDataFile();
-  const idx = categories.findIndex(c => String(c.id) === String(id));
-  if (idx === -1) return false;
-  categories[idx] = { ...categories[idx], ...updates };
-  return await saveCategories(categories);
 }
 
 export async function deleteCategory(id: number | string): Promise<boolean> {
   if (isSupabaseConfigured) {
     const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (!error) return true;
-    console.error("Supabase deleteCategory error:", error);
-    return false;
+    if (error) {
+      console.error("Supabase deleteCategory error:", error);
+      return false;
+    }
+    return true;
+  } else {
+    const categories = await ensureDataFile();
+    const next = categories.filter(c => String(c.id) !== String(id));
+    if (next.length === categories.length) return false;
+    return await saveCategories(next);
   }
-
-  const categories = await ensureDataFile();
-  const next = categories.filter(c => String(c.id) !== String(id));
-  if (next.length === categories.length) return false;
-  return await saveCategories(next);
 }
