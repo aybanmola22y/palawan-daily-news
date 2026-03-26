@@ -40,6 +40,8 @@ create table if not exists articles (
     featured_image text,
     category_id integer references categories(id) on delete set null,
     author_id uuid references profiles(id) on delete set null,
+    author_name text,
+    author_avatar text,
     status text default 'draft', -- draft, pending_review, published, scheduled
     featured boolean default false,
     breaking boolean default false,

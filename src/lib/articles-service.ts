@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { mockArticles } from "./mock-data";
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { supabase, isSupabaseConfigured, supabaseAdmin } from "./supabase";
 
 export interface StoredArticle {
   id: number;
@@ -255,7 +255,7 @@ export async function getArticleBySlug(slug: string) {
 
 export async function createArticle(input: Partial<StoredArticle>): Promise<StoredArticle | null> {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("articles")
       .insert({
         title: input.title,
@@ -315,7 +315,7 @@ export async function createArticle(input: Partial<StoredArticle>): Promise<Stor
 
 export async function updateArticle(id: number | string, updates: Partial<StoredArticle>): Promise<boolean> {
   if (isSupabaseConfigured) {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("articles")
       .update({
         title: updates.title,
@@ -369,12 +369,14 @@ export async function updateArticle(id: number | string, updates: Partial<Stored
 
 export async function deleteArticle(id: number | string): Promise<boolean> {
   if (isSupabaseConfigured) {
-    const { error } = await supabase
+    // A physical delete on 'articles' will trigger the 'on_article_delete' function
+    // which moves the row to 'trash_articles' automatically.
+    const { error } = await supabaseAdmin
       .from("articles")
-      .update({ deleted_at: new Date().toISOString() })
+      .delete()
       .eq("id", id);
     if (!error) return true;
-    console.error("Supabase deleteArticle (soft) error:", error);
+    console.error("Supabase deleteArticle (physical move to trash) error:", error);
     return false;
   }
 
@@ -387,10 +389,10 @@ export async function deleteArticle(id: number | string): Promise<boolean> {
 
 export async function getDeletedArticles(): Promise<StoredArticle[]> {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
-      .from("articles")
+    // Fetch from the physical trash table
+    const { data, error } = await supabaseAdmin
+      .from("trash_articles")
       .select("*, categories(name, slug), profiles(name, avatar_url)")
-      .not("deleted_at", "is", null)
       .order("deleted_at", { ascending: false });
     
     if (!error && data) return data.map(fromSupabase);
@@ -402,12 +404,29 @@ export async function getDeletedArticles(): Promise<StoredArticle[]> {
 
 export async function restoreArticle(id: number | string): Promise<boolean> {
   if (isSupabaseConfigured) {
-    const { error } = await supabase
+    // 1. Fetch from trash
+    const { data: article, error: fetchError } = await supabaseAdmin
+      .from("trash_articles")
+      .select("*")
+      .eq("id", id)
+      .single();
+    
+    if (fetchError || !article) return false;
+
+    // 2. Insert back into articles (remove deleted_at)
+    const { deleted_at, ...originalData } = article;
+    const { error: insertError } = await supabaseAdmin
       .from("articles")
-      .update({ deleted_at: null })
-      .eq("id", id);
-    if (!error) return true;
-    return false;
+      .insert({ ...originalData, deleted_at: null });
+    
+    if (insertError) {
+      console.error("Supabase restoreArticle (insert back) error:", insertError);
+      return false;
+    }
+
+    // 3. Delete from trash
+    await supabaseAdmin.from("trash_articles").delete().eq("id", id);
+    return true;
   }
 
   const articles = await ensureDataFile();
@@ -419,7 +438,8 @@ export async function restoreArticle(id: number | string): Promise<boolean> {
 
 export async function permanentlyDeleteArticle(id: number | string): Promise<boolean> {
   if (isSupabaseConfigured) {
-    const { error } = await supabase.from("articles").delete().eq("id", id);
+    // Delete from the physical trash table
+    const { error } = await supabaseAdmin.from("trash_articles").delete().eq("id", id);
     if (!error) return true;
     return false;
   }
