@@ -52,6 +52,20 @@ export default async function HomePage() {
       <Navbar />
 
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
+        {published.length === 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-12 text-center mb-12">
+            <h2 className="font-playfair font-bold text-2xl text-amber-900 mb-4">Welcome to Palawan Daily News!</h2>
+            <p className="text-amber-800 mb-6 max-w-lg mx-auto">
+              You are successfully connected to Supabase. To see your content here, please go to the Admin Dashboard and create your first article, or run the seed script.
+            </p>
+            <Link 
+              href="/admin" 
+              className="inline-flex items-center gap-2 bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+            >
+              Go to Admin Dashboard <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
         {/* Category Browser - Top Bar */}
         <section className="mb-8 p-3 bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">

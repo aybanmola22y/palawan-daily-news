@@ -37,7 +37,9 @@ const CATEGORY_VARIANT_MAP: Record<string, any> = {
 };
 
 export default function ArticleCard({ article, variant = "default", className }: ArticleCardProps) {
-  const [imgSrc, setImgSrc] = useState(article.featuredImage || DEFAULT_ARTICLE_IMAGE);
+  const [imgSrc, setImgSrc] = useState(article?.featuredImage || DEFAULT_ARTICLE_IMAGE);
+
+  if (!article) return null;
 
   if (variant === "featured") {
     return (
