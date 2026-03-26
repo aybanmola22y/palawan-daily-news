@@ -92,12 +92,13 @@ export async function POST(request: Request) {
 
     if (!article) {
       return NextResponse.json(
-        { error: "Failed to create article" },
+        { error: "Failed to create article in database" },
         { status: 400 }
       );
     }
     return NextResponse.json(article);
-  } catch {
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  } catch (error: any) {
+    console.error("API Articles POST Error:", error);
+    return NextResponse.json({ error: error.message || "Invalid request" }, { status: 400 });
   }
 }
