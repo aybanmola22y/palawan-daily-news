@@ -487,7 +487,7 @@ export const mockArticles = [
     slug: "mimaropa-unity-games-puerto-princesa",
     excerpt: "Athletes from across the five provinces of the MIMAROPA region will gather for a week of sporting competition and cultural exchange.",
     content: `<p>The City of Puerto Princesa is all set to host the MIMAROPA Unity Games, bringing together thousands of athletes and officials from Oriental Mindoro, Occidental Mindoro, Marinduque, Romblon, and Palawan.</p>`,
-    featuredImage: "https://images.unsplash.com/photo-1461896742584-332580f01580?w=800&h=400&fit=crop",
+    featuredImage: "https://images.unsplash.com/photo-1541252260730-0412e8e2108e?w=800&h=400&fit=crop",
     categoryId: 16, // Regional context
     categoryName: "Regional News",
     categorySlug: "regional-news",
@@ -735,7 +735,7 @@ export type MockCategory = (typeof mockCategories)[0];
 
 export interface Advertisement {
   id: string;
-  type: 'billboard' | 'leaderboard' | 'sidebar';
+  type: 'billboard' | 'leaderboard' | 'sidebar' | 'header';
   fit: 'cover' | 'contain';
   imageUrl?: string;
   linkUrl?: string;
@@ -768,6 +768,14 @@ export const mockAds: Advertisement[] = [
     active: false,
     label: "SIDEBAR ADVERTISEMENT SPACE",
     sublabel: "Contact us at ads@palawandaily.com for rates",
+  },
+  {
+    id: "home-header",
+    type: "header",
+    fit: "cover",
+    active: true,
+    label: "Be a certified safety officer",
+    sublabel: "Attend our online and face-to-face training.",
   },
 ];
 

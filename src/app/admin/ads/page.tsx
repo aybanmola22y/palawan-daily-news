@@ -13,15 +13,15 @@ export default async function AdminAdsPage() {
     const ads = await getAds();
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen bg-background text-foreground">
             <AdminSidebar user={user as any} />
 
             <main className="flex-1 overflow-auto">
                 {/* Header */}
-                <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+                <div className="bg-card border-b border-border px-8 py-4 flex items-center justify-between">
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">Manage Advertisements</h1>
-                        <p className="text-sm text-gray-500">Control promotional banners across the website</p>
+                        <h1 className="text-xl font-bold text-foreground">Manage Advertisements</h1>
+                        <p className="text-sm text-muted-foreground">Control promotional banners across the website</p>
                     </div>
                     <Link
                         href="/admin/ads/new"
@@ -35,13 +35,13 @@ export default async function AdminAdsPage() {
                 <div className="p-8">
                     <AdsTableClient initialAds={ads} />
 
-                    <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6 flex gap-4">
-                        <div className="bg-blue-100 p-3 rounded-full h-fit">
-                            <Megaphone className="h-6 w-6 text-blue-600" />
+                    <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-6 flex gap-4">
+                        <div className="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full h-fit">
+                            <Megaphone className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-blue-900 mb-1">How Ad Management works</h3>
-                            <p className="text-blue-800 text-sm leading-relaxed max-w-2xl">
+                            <h3 className="font-bold text-blue-900 dark:text-blue-200 mb-1">How Ad Management works</h3>
+                            <p className="text-blue-800 dark:text-blue-300 text-sm leading-relaxed max-w-2xl">
                                 When you activate an advertisement and upload an image, it will automatically replace the placeholder blocks on your website.
                                 You can set up distinct images for different placements like the homepage billboard or sidebar.
                             </p>

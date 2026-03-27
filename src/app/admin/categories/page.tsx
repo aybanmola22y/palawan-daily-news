@@ -101,16 +101,16 @@ export default function CategoriesPage() {
   }
 
   const colorMap: Record<string, string> = {
-    blue: "bg-blue-100 text-blue-700",
-    green: "bg-green-100 text-green-700",
-    red: "bg-red-100 text-red-700",
-    orange: "bg-orange-100 text-orange-700",
-    emerald: "bg-emerald-100 text-emerald-700",
-    purple: "bg-purple-100 text-purple-700",
+    blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800",
+    green: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800",
+    red: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800",
+    orange: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800",
+    emerald: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800",
+    purple: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800",
   };
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
+    <div className="flex min-h-screen bg-background text-foreground">
       <AdminSidebar user={demoUser} />
       <main className="flex-1 overflow-auto">
         <div className="bg-card border-b border-border px-8 py-4 flex items-center justify-between">

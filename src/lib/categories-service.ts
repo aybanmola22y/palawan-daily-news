@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { mockCategories } from "./mock-data";
 import { getArticles } from "./articles-service";
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { supabase, isSupabaseConfigured, supabaseAdmin } from "./supabase";
 
 export interface StoredCategory {
   id: number;
@@ -88,7 +88,7 @@ export async function getCategories(): Promise<StoredCategory[]> {
 
 export async function createCategory(input: Partial<StoredCategory>): Promise<StoredCategory | null> {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("categories")
       .insert({
         name: input.name,
@@ -100,7 +100,10 @@ export async function createCategory(input: Partial<StoredCategory>): Promise<St
       .single();
     
     if (!error && data) return fromSupabase(data);
-    if (error) console.error("Supabase createCategory error:", error);
+    if (error) {
+      console.error("Supabase createCategory error:", error);
+      return null; // Don't fall back to JSON if Supabase is configured
+    }
   }
 
   const categories = await ensureDataFile();
@@ -130,7 +133,7 @@ export async function updateCategory(id: number | string, updates: Partial<Store
       .eq("id", id);
     if (!error) return true;
     console.error("Supabase updateCategory error:", error);
-    return false;
+    return false; // Don't fall back to JSON if Supabase is configured
   }
 
   const categories = await ensureDataFile();
@@ -142,10 +145,10 @@ export async function updateCategory(id: number | string, updates: Partial<Store
 
 export async function deleteCategory(id: number | string): Promise<boolean> {
   if (isSupabaseConfigured) {
-    const { error } = await supabase.from("categories").delete().eq("id", id);
+    const { error } = await supabaseAdmin.from("categories").delete().eq("id", id);
     if (!error) return true;
     console.error("Supabase deleteCategory error:", error);
-    return false;
+    return false; // Don't fall back to JSON if Supabase is configured
   }
 
   const categories = await ensureDataFile();

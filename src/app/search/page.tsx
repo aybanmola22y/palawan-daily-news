@@ -20,13 +20,15 @@ export default async function SearchPage({ searchParams }: Props) {
   const published = await getPublishedArticles();
 
   const results = query
-    ? published.filter(
-      (a) =>
-        a.title.toLowerCase().includes(query) ||
-        a.excerpt.toLowerCase().includes(query) ||
-        a.categoryName.toLowerCase().includes(query) ||
-        a.tags.some((t) => t.toLowerCase().includes(query))
-    )
+    ? published.filter((a) => {
+        const regex = new RegExp(`\\b${query}\\b`, "i");
+        return (
+          regex.test(a.title) ||
+          regex.test(a.excerpt) ||
+          regex.test(a.categoryName) ||
+          a.tags.some((t) => regex.test(t))
+        );
+      })
     : [];
 
   return (

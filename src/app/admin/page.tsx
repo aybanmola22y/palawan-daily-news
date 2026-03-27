@@ -190,10 +190,10 @@ export default async function AdminDashboard() {
                             variant="outline" 
                             className={cn(
                               "font-medium",
-                              displayStatus === 'published' ? "border-green-200 bg-green-50 text-green-700 hover:bg-green-100" :
-                              displayStatus === 'scheduled' ? "border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100" :
-                              displayStatus === 'pending_review' ? "border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100" :
-                              "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
+                              displayStatus === 'published' ? "border-green-200 dark:border-green-900/40 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30" :
+                              displayStatus === 'scheduled' ? "border-purple-200 dark:border-purple-900/40 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30" :
+                              displayStatus === 'pending_review' ? "border-yellow-200 dark:border-yellow-900/40 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/30" :
+                              "border-border bg-muted text-muted-foreground hover:bg-muted/80"
                             )}
                           >
                             {displayStatus === 'published' ? 'Published' :

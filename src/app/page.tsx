@@ -14,6 +14,7 @@ import { TrendingUp, Mail, ArrowRight } from "lucide-react";
 import { AdPlaceholder } from "@/components/public/AdPlaceholder";
 import CategoryDropdown from "@/components/public/CategoryDropdown";
 import SectionHeader from "@/components/public/SectionHeader";
+import BannerAd from "@/components/public/BannerAd";
 
 export const metadata: Metadata = {
   title: "Palawan Daily News - Palawan's Premier News Source",
@@ -46,6 +47,7 @@ export default async function HomePage() {
 
   const billboardAd = ads.find(ad => ad.id === "home-billboard");
   const leaderboardAd = ads.find(ad => ad.id === "home-leaderboard");
+  const headerAd = ads.find(ad => ad.id === "home-header");
 
   return (
     <>
@@ -66,6 +68,11 @@ export default async function HomePage() {
             </Link>
           </div>
         )}
+        {/* Header Advertisement */}
+        <section className="mb-6">
+          <BannerAd ad={headerAd} />
+        </section>
+
         {/* Category Browser - Top Bar */}
         <section className="mb-8 p-3 bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">

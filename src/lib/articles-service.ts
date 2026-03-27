@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { mockArticles } from "./mock-data";
+import { mockArticles, mockOrgChartEmployees } from "./mock-data";
 import { supabase, isSupabaseConfigured, supabaseAdmin } from "./supabase";
 
 export interface StoredArticle {
@@ -15,6 +15,7 @@ export interface StoredArticle {
   categorySlug: string;
   authorName: string;
   authorAvatar: string;
+  authorId?: string;
   status: string;
   featured: boolean;
   breaking: boolean;
@@ -36,6 +37,9 @@ let cachedMtimeMs: number | null = null;
 function toStored(article: (typeof mockArticles)[0]): StoredArticle {
   return {
     ...article,
+    authorName: article.authorName,
+    authorAvatar: article.authorAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    authorId: (article as any).authorId || article.authorName,
     publishedAt: article.publishedAt instanceof Date ? article.publishedAt.toISOString() : article.publishedAt,
     tags: Array.isArray(article.tags) ? article.tags : [],
   };
@@ -61,6 +65,7 @@ function fromSupabase(row: any): StoredArticle {
     categorySlug: row.categories?.slug || "",
     authorName: row.author_name || (row.profiles?.name) || "Staff",
     authorAvatar: row.author_avatar || (row.profiles?.avatar_url) || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    authorId: row.author_id || row.author_name, // Fallback to name for local/mock matching
     status: row.status,
     featured: row.featured,
     breaking: row.breaking,
@@ -177,6 +182,11 @@ export async function getArticles(includeDeleted: boolean = false): Promise<Stor
     if (!error && data) {
       return data.map(fromSupabase);
     }
+    if (error) {
+      console.error("Supabase getArticles error:", error);
+      // Return empty array or throw instead of falling back to stale JSON
+      // return []; 
+    }
   }
 
   const articles = await ensureDataFile();
@@ -276,12 +286,15 @@ export async function createArticle(input: Partial<StoredArticle>): Promise<Stor
       .single();
     
     if (!error && data) {
+      const { revalidatePath } = await import("next/cache");
+      revalidatePath("/");
+      revalidatePath("/admin/articles");
       return fromSupabase(data);
     }
-    console.error("Supabase createArticle error:", error);
-    // Return null — do NOT fall through to the JSON file writer.
-    // On Vercel the filesystem is read-only and would crash if we tried.
-    return null;
+    if (error) {
+      console.error("Supabase createArticle error:", error);
+      return null;
+    }
   }
 
   // Local JSON fallback — only used when Supabase is NOT configured at all
@@ -338,7 +351,12 @@ export async function updateArticle(id: number | string, updates: Partial<Stored
       })
       .eq("id", id);
     
-    if (!error) return true;
+    if (!error) {
+      const { revalidatePath } = await import("next/cache");
+      revalidatePath("/");
+      revalidatePath("/admin/articles");
+      return true;
+    }
     console.error("Supabase updateArticle error:", error);
     return false;
   }
@@ -452,4 +470,131 @@ export async function permanentlyDeleteArticle(id: number | string): Promise<boo
   const next = articles.filter((a) => String(a.id) !== String(id));
   if (next.length === articles.length) return false;
   return await saveArticles(next);
+}
+
+export async function getAuthorById(id: string) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", id)
+      .single();
+    
+    if (!error && data) return data;
+  }
+  
+  // Try authors table next
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("authors")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (!error && data) return data;
+  }
+  
+  // Fallback for mock/demo purposes
+  if (id === "author-1") {
+    return {
+      id: "author-1",
+      name: "Staff Reporter",
+      email: "staff@palawandaily.com",
+      role: "writer",
+      avatar_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+      department: "Editorial",
+      title: "Senior Staff Reporter",
+      active: true,
+      created_at: new Date("2024-01-01").toISOString()
+    };
+  }
+  
+  // Try to match by name if the ID looks like a name (fallback)
+  const emp = mockOrgChartEmployees.find((e: any) => e.name === id || e.id === id);
+  if (emp) {
+    return {
+      id: emp.id,
+      name: emp.name,
+      email: emp.name.toLowerCase().replace(/\s+/g, ".") + "@palawandaily.com",
+      role: "writer",
+      avatar_url: emp.avatarUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+      department: emp.department,
+      title: emp.title,
+      active: true,
+      created_at: new Date("2024-01-15").toISOString()
+    };
+  }
+  
+  return null;
+}
+
+export async function getAuthorByName(name: string) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("name", name)
+      .single();
+    if (!error && data) return data;
+  }
+  return getAuthorById(name); // fallback to ID/name search
+}
+
+export async function getArticlesByAuthor(authorId: string) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*, categories(name, slug)")
+      .eq("author_id", authorId)
+      .eq("status", "published")
+      .order("published_at", { ascending: false });
+    
+    if (!error && data) return data.map(fromSupabase).map(fromStored);
+  }
+  
+  const articles = await getPublishedArticles();
+  return articles.filter(a => a.authorId === authorId || a.authorName === authorId);
+}
+
+export async function deleteAuthor(id: string) {
+  if (isSupabaseConfigured) {
+    // Try authors table first (the one just created)
+    let { error } = await supabaseAdmin.from("authors").delete().eq("id", id);
+    if (error) {
+      // Try profiles as fallback
+      const { error: profileError } = await supabaseAdmin.from("profiles").delete().eq("id", id);
+      error = profileError;
+    }
+    return !error;
+  }
+  return false;
+}
+
+export async function getAuthors() {
+  if (isSupabaseConfigured) {
+    // Try authors table first
+    const { data: authors, error: authorsError } = await supabase
+      .from("authors")
+      .select("*");
+    
+    if (!authorsError && authors && authors.length > 0) return authors;
+    
+    // Fallback to profiles
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("*");
+    
+    if (!profilesError && profiles) return profiles;
+  }
+  
+  return mockOrgChartEmployees.map(emp => ({
+    id: emp.id,
+    name: emp.name,
+    email: emp.name.toLowerCase().replace(/\s+/g, ".") + "@palawandaily.com",
+    role: "writer",
+    avatar_url: emp.avatarUrl,
+    department: emp.department,
+    title: emp.title,
+    active: true,
+    created_at: new Date("2024-01-15").toISOString()
+  }));
 }

@@ -104,8 +104,9 @@ export default function ArticlesTableClient({ articles }: { articles: ArticleRow
         if (val !== month) return false;
       }
       if (q) {
-        const hay = `${a.title} ${a.slug} ${a.category} ${a.author}`.toLowerCase();
-        if (!hay.includes(q)) return false;
+        const regex = new RegExp(`\\b${q}\\b`, "i");
+        const hay = `${a.title} ${a.slug} ${a.category} ${a.author}`;
+        if (!regex.test(hay)) return false;
       }
       return true;
     });
@@ -296,7 +297,7 @@ export default function ArticlesTableClient({ articles }: { articles: ArticleRow
               </button>
               
               <div className="flex items-center px-2">
-                <span className="text-xs font-semibold text-foreground bg-white px-3 py-1 rounded shadow-sm border border-border/50 min-w-8 text-center tabular-nums">
+                <span className="text-xs font-semibold text-foreground bg-background px-3 py-1 rounded shadow-sm border border-border min-w-8 text-center tabular-nums">
                   {currentPage}
                 </span>
                 <span className="mx-2 text-xs text-muted-foreground">of</span>

@@ -22,11 +22,15 @@ export default function AdsTableClient({ initialAds }: AdsTableClientProps) {
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const filteredAds = ads.filter(ad => 
-        ad.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ad.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ad.type.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredAds = ads.filter(ad => {
+        if (!searchQuery) return true;
+        const regex = new RegExp(`\\b${searchQuery}\\b`, "i");
+        return (
+            regex.test(ad.label) ||
+            regex.test(ad.id) ||
+            regex.test(ad.type)
+        );
+    });
 
     const toggleStatus = async (ad: Advertisement) => {
         setLoadingId(ad.id);
@@ -72,48 +76,48 @@ export default function AdsTableClient({ initialAds }: AdsTableClientProps) {
         <div className="space-y-4">
             {/* Search Bar */}
             <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                     type="text"
                     placeholder="Search ads..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all text-foreground"
                 />
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden text-foreground">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-muted/50 border-b border-border">
                             <tr>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Placement</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Image</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Placement</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Image</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-border/50">
                             {filteredAds.map((ad) => (
-                                <tr key={ad.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={ad.id} className="hover:bg-muted/30 transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-gray-900 text-sm">{ad.label}</div>
-                                        <div className="text-xs text-gray-500">{ad.id}</div>
+                                        <div className="font-medium text-foreground text-sm">{ad.label}</div>
+                                        <div className="text-xs text-muted-foreground">{ad.id}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 capitalize">
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 capitalize">
                                             <Layout className="h-3 w-3" />
                                             {ad.type}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         {ad.imageUrl ? (
-                                            <div className="w-20 h-10 rounded border border-gray-200 overflow-hidden relative self-center">
+                                            <div className="w-20 h-10 rounded border border-border overflow-hidden relative self-center">
                                                 <img src={ad.imageUrl} alt={ad.label} className="object-cover w-full h-full" />
                                             </div>
                                         ) : (
-                                            <span className="text-xs text-gray-400 italic">No image uploaded</span>
+                                            <span className="text-xs text-muted-foreground italic">No image uploaded</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4">
@@ -123,8 +127,8 @@ export default function AdsTableClient({ initialAds }: AdsTableClientProps) {
                                             className={cn(
                                                 "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border transition-all hover:shadow-sm",
                                                 ad.active 
-                                                    ? "bg-green-50 text-green-700 border-green-100 hover:bg-green-100" 
-                                                    : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200",
+                                                    ? "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50" 
+                                                    : "bg-muted/50 text-muted-foreground border-border hover:bg-muted",
                                                 loadingId === ad.id && "opacity-50 cursor-wait"
                                             )}
                                         >
@@ -140,7 +144,7 @@ export default function AdsTableClient({ initialAds }: AdsTableClientProps) {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-3">
-                                            <Link href={`/admin/ads/${ad.id}`} className="text-gray-400 hover:text-blue-600 transition-colors">
+                                            <Link href={`/admin/ads/${ad.id}`} className="text-muted-foreground hover:text-blue-600 transition-colors">
                                                 <Edit className="h-4 w-4" />
                                             </Link>
                                             
@@ -150,7 +154,7 @@ export default function AdsTableClient({ initialAds }: AdsTableClientProps) {
                                                 rel="noopener noreferrer" 
                                                 className={cn(
                                                     "transition-colors",
-                                                    ad.linkUrl ? "text-gray-400 hover:text-gray-600" : "text-gray-200 cursor-not-allowed"
+                                                    ad.linkUrl ? "text-muted-foreground hover:text-foreground" : "text-muted-foreground/30 cursor-not-allowed"
                                                 )}
                                                 onClick={(e) => !ad.linkUrl && e.preventDefault()}
                                                 title={ad.linkUrl ? "Open link" : "No link set"}
@@ -162,7 +166,7 @@ export default function AdsTableClient({ initialAds }: AdsTableClientProps) {
                                                 onClick={() => handleDelete(ad.id)}
                                                 disabled={deletingId === ad.id}
                                                 className={cn(
-                                                    "text-gray-400 hover:text-red-600 transition-colors",
+                                                    "text-muted-foreground hover:text-red-600 transition-colors",
                                                     deletingId === ad.id && "opacity-50 cursor-not-allowed"
                                                 )}
                                             >

@@ -1,8 +1,9 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 export const dynamic = "force-dynamic";
-import { PlusCircle, Shield, Edit, Trash2 } from "lucide-react";
-import { mockOrgChartEmployees } from "@/lib/mock-data";
-import { getArticlesForFrontend } from "@/lib/articles-service";
+import { PlusCircle, Shield } from "lucide-react";
+import { getArticlesForFrontend, getAuthors } from "@/lib/articles-service";
+import DeleteUserButton from "./DeleteUserButton";
+import EditUserModal from "./EditUserModal";
 
 const demoUser = { name: "Demo Admin", email: "admin@palawandaily.com", role: "super_admin" };
 
@@ -14,34 +15,33 @@ const roleConfig: Record<string, { label: string; className: string }> = {
 
 export default async function UsersPage() {
   const articles = await getArticlesForFrontend();
+  const rawUsers = await getAuthors();
   
-  const users = mockOrgChartEmployees.map((emp, index) => {
-    let role = "writer";
-    if (emp.department === "management") role = "super_admin";
-    else if (emp.title.toLowerCase().includes("editor")) role = "editor";
-    
-    const userArticlesCount = articles.filter(a => a.authorName === emp.name).length;
+  const users = rawUsers.map((user: any) => {
+    const userArticlesCount = articles.filter(a => a.authorName === user.name).length;
     
     return {
-      id: parseInt(emp.id),
-      name: emp.name,
-      email: emp.name.toLowerCase().replace(/\s+/g, ".") + "@palawandaily.com",
-      role: role,
-      active: index !== mockOrgChartEmployees.length - 1,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      department: user.department,
+      title: user.title,
+      active: user.active ?? true,
       articles: userArticlesCount,
-      createdAt: "Jan 15, 2024",
-      avatar: emp.avatarUrl
+      createdAt: new Date(user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      avatar: user.avatar_url
     };
   });
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background text-foreground">
       <AdminSidebar user={demoUser} />
       <main className="flex-1 overflow-auto">
-        <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+        <div className="bg-card border-b border-border px-8 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Users</h1>
-            <p className="text-sm text-gray-500">Manage team members and roles</p>
+            <h1 className="text-xl font-bold text-foreground">Users</h1>
+            <p className="text-sm text-muted-foreground">Manage team members and roles</p>
           </div>
           <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
             <PlusCircle className="h-4 w-4" />
@@ -50,49 +50,49 @@ export default async function UsersPage() {
         </div>
 
         <div className="p-8">
-          {/* Role legend */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          {/* Role legend - adapting to card style */}
+          <div className="bg-card rounded-xl border border-border shadow-sm p-4 mb-6">
+            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <Shield className="h-4 w-4 text-red-600" />
               Role Permissions
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-3 bg-red-50 rounded-lg">
-                <p className="text-sm font-semibold text-red-700 mb-1">Super Admin</p>
-                <p className="text-xs text-red-600">Full access — manage users, settings, all content</p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">Super Admin</p>
+                <p className="text-xs text-red-600/80 dark:text-red-300/80">Full access — manage users, settings, all content</p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm font-semibold text-blue-700 mb-1">Editor</p>
-                <p className="text-xs text-blue-600">Review, approve, reject, publish, schedule articles</p>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-1">Editor</p>
+                <p className="text-xs text-blue-600/80 dark:text-blue-300/80">Review, approve, reject, publish, schedule articles</p>
               </div>
-              <div className="p-3 bg-green-50 rounded-lg">
-                <p className="text-sm font-semibold text-green-700 mb-1">Writer</p>
-                <p className="text-xs text-green-600">Create drafts, submit for review, edit own articles</p>
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-sm font-semibold text-green-700 dark:text-green-400 mb-1">Writer</p>
+                <p className="text-xs text-green-600/80 dark:text-green-300/80">Create drafts, submit for review, edit own articles</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-muted/50 border-b border-border">
                 <tr>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">User</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Role</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Articles</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Joined</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase">User</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase">Role</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase">Articles</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase">Joined</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border/50">
                 {users.map((user) => {
                   const role = roleConfig[user.role];
                   return (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           {user.avatar ? (
-                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
+                            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 border border-border">
                               <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                             </div>
                           ) : (
@@ -101,8 +101,8 @@ export default async function UsersPage() {
                             </div>
                           )}
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
+                            <p className="text-sm font-medium text-foreground">{user.name}</p>
+                            <p className="text-xs text-muted-foreground">{user.email}</p>
                           </div>
                         </div>
                       </td>
@@ -111,22 +111,18 @@ export default async function UsersPage() {
                           {role.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{user.articles}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{user.articles}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.active ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400" : "bg-muted/50 text-muted-foreground"}`}>
                           {user.active ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{user.createdAt}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{user.createdAt}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
-                            <Edit className="h-4 w-4" />
-                          </button>
+                          <EditUserModal user={user} />
                           {user.role !== "super_admin" && (
-                            <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            <DeleteUserButton userId={user.id} userName={user.name} />
                           )}
                         </div>
                       </td>

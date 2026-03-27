@@ -28,5 +28,13 @@
     "sublabel": "Contact us at ads@palawandaily.com for rates",
     "imageUrl": "https://www.aljazeera.com/wp-content/uploads/2022/01/tesla.jpg?resize=1800%2C1800",
     "linkUrl": "https://www.youtube.com/"
+  },
+  {
+    "id": "home-header",
+    "type": "header",
+    "fit": "cover",
+    "active": true,
+    "label": "Be a certified safety officer",
+    "sublabel": "Attend our online and face-to-face training here at Petrosphere Incorporated"
   }
 ]
