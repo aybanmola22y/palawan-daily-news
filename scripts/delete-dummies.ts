@@ -14,7 +14,7 @@ if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl!, supabaseKey!);
 
 async function main() {
   console.log("Deleting demo articles from Supabase...");
