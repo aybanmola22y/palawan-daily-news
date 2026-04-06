@@ -15,6 +15,7 @@ import { sanitizeHtml } from "@/lib/utils/security";
 import { Clock, Eye } from "lucide-react";
 import { AdPlaceholder } from "@/components/public/AdPlaceholder";
 import ShareButtons from "@/components/public/ShareButtons";
+import AuthorHoverCard from "@/components/public/AuthorHoverCard";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -118,35 +119,11 @@ export default async function ArticlePage({ params }: Props) {
             {/* Meta */}
             <div className="flex flex-wrap items-center gap-4 mb-6 py-4 border-t border-b border-gray-200">
               <div className="flex items-center gap-2">
-                {article.authorId ? (
-                  <Link href={`/author/${article.authorId}`} className="group flex items-center gap-2">
-                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center transition-ring group-hover:ring-2 ring-red-500 ring-offset-2">
-                      {article.authorAvatar ? (
-                        <Image src={article.authorAvatar} alt={article.authorName} fill className="object-cover" />
-                      ) : (
-                        <span className="text-gray-500 text-xs font-bold">{article.authorName?.charAt(0) ?? "A"}</span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-gray-900 group-hover:text-red-600 transition-colors">{article.authorName}</p>
-                      <p className="text-xs text-gray-500">Staff Reporter</p>
-                    </div>
-                  </Link>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                      {article.authorAvatar ? (
-                        <Image src={article.authorAvatar} alt={article.authorName} fill className="object-cover" />
-                      ) : (
-                        <span className="text-gray-500 text-xs font-bold">{article.authorName?.charAt(0) ?? "A"}</span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm text-gray-900">{article.authorName}</p>
-                      <p className="text-xs text-gray-500">Staff Reporter</p>
-                    </div>
-                  </div>
-                )}
+                <AuthorHoverCard 
+                  authorId={article.authorId}
+                  authorName={article.authorName}
+                  authorAvatar={article.authorAvatar}
+                />
               </div>
               <Separator orientation="vertical" className="h-8 hidden sm:block" />
               <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -163,7 +140,7 @@ export default async function ArticlePage({ params }: Props) {
 
             {/* Featured Image */}
             {article.featuredImage && (
-              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden mb-8">
+              <div className="relative w-full aspect-[1200/630] rounded-xl overflow-hidden mb-8 bg-gray-50 border border-gray-100">
                 <Image
                   src={article.featuredImage}
                   alt={article.title}

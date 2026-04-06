@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import ArticleCard from "@/components/public/ArticleCard";
-import { getPublishedArticles } from "@/lib/articles-service";
+import { getPublishedArticles, searchArticles } from "@/lib/articles-service";
 import { Search } from "lucide-react";
 
 interface Props {
@@ -16,20 +16,8 @@ export const metadata: Metadata = {
 
 export default async function SearchPage({ searchParams }: Props) {
   const { q = "" } = await searchParams;
-  const query = q.toLowerCase().trim();
-  const published = await getPublishedArticles();
-
-  const results = query
-    ? published.filter((a) => {
-        const regex = new RegExp(`\\b${query}\\b`, "i");
-        return (
-          regex.test(a.title) ||
-          regex.test(a.excerpt) ||
-          regex.test(a.categoryName) ||
-          a.tags.some((t) => regex.test(t))
-        );
-      })
-    : [];
+  const query = q.trim();
+  const results = query ? await searchArticles(query, 100) : [];
 
   return (
     <>
@@ -72,7 +60,7 @@ export default async function SearchPage({ searchParams }: Props) {
             </div>
             {results.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {results.map((article) => (
+                {results.map((article: any) => (
                   <ArticleCard key={article.id} article={article} />
                 ))}
               </div>

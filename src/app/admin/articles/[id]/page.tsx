@@ -33,6 +33,10 @@ const emptyForm = {
   featured: false,
   breaking: false,
   scheduledAt: "",
+  authorName: "",
+  authorAvatar: "",
+  seoTitle: "",
+  seoDescription: "",
 };
 
 export default function EditArticlePage() {
@@ -94,6 +98,10 @@ export default function EditArticlePage() {
           featured: a.featured ?? false,
           breaking: a.breaking ?? false,
           scheduledAt: formatDateTimeLocal(a.publishedAt),
+          authorName: a.authorName ?? "",
+          authorAvatar: a.authorAvatar ?? "",
+          seoTitle: a.seoTitle ?? "",
+          seoDescription: a.seoDescription ?? "",
         });
       } catch {
         // ignore
@@ -327,6 +335,26 @@ export default function EditArticlePage() {
             </div>
 
             <div className="space-y-6">
+              <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+                <h3 className="font-bold text-foreground mb-4 uppercase tracking-widest text-xs">SEO Settings</h3>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={form.seoTitle}
+                    onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
+                    placeholder="SEO Title Override"
+                    className="w-full h-10 px-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                  <textarea
+                    value={form.seoDescription}
+                    onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
+                    placeholder="SEO Description (150-160 chars)"
+                    rows={2}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                  />
+                </div>
+              </div>
+
               <div className="bg-card rounded-xl border border-border shadow-sm p-6 space-y-6">
                 <h3 className="font-bold text-foreground border-b border-border pb-4 uppercase tracking-widest text-xs">Publish Settings</h3>
 
@@ -406,13 +434,37 @@ export default function EditArticlePage() {
               </div>
 
               <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+                <h3 className="font-bold text-foreground mb-4 uppercase tracking-widest text-xs">Author Profile</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Author Name</label>
+                    <input
+                      type="text"
+                      value={form.authorName}
+                      onChange={(e) => setForm({ ...form, authorName: e.target.value })}
+                      className="w-full h-10 px-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Author Avatar URL</label>
+                    <input
+                      type="text"
+                      value={form.authorAvatar}
+                      onChange={(e) => setForm({ ...form, authorAvatar: e.target.value })}
+                      className="w-full h-10 px-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card rounded-xl border border-border shadow-sm p-6">
                 <h3 className="font-bold text-foreground mb-4 uppercase tracking-widest text-xs tracking-tighter">Featured Image</h3>
                 {form.featuredImage ? (
-                  <div className="rounded-xl overflow-hidden mb-4 border border-border bg-muted">
-                    <img src={form.featuredImage} alt="Featured" className="w-full h-64 object-cover" />
+                  <div className="rounded-xl overflow-hidden mb-4 border border-border bg-muted/50 p-2 flex justify-center">
+                    <img src={form.featuredImage} alt="Featured" className="w-full max-h-[400px] object-contain rounded-lg shadow-sm" />
                   </div>
                 ) : (
-                  <label className="border-2 border-dashed border-border rounded-xl p-16 text-center hover:border-red-500/50 transition-colors cursor-pointer mb-4 block group">
+                  <label className="border-2 border-dashed border-border rounded-xl p-16 text-center hover:border-red-500/50 transition-colors cursor-pointer mb-4 block group bg-muted/10">
                     <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                       const f = e.target.files?.[0];
                       if (f) void uploadFeaturedImage(f);

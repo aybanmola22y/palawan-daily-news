@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { getArticlesForFrontend } from "@/lib/articles-service";
+import { getArticles } from "@/lib/articles-service";
 import { PlusCircle } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import ArticlesTableClient from "@/components/admin/ArticlesTableClient";
@@ -14,7 +14,7 @@ import ArticlesTableClient from "@/components/admin/ArticlesTableClient";
 export default async function ArticlesPage() {
   const user = await getSession();
 
-  const raw = await getArticlesForFrontend();
+  const raw = await getArticles(false, 500);
   const articles = raw.map((a) => ({
     id: a.id,
     slug: a.slug,
@@ -23,7 +23,7 @@ export default async function ArticlesPage() {
     status: a.status,
     author: a.authorName,
     date: formatDate(a.publishedAt),
-    publishedAt: a.publishedAt,
+    publishedAt: new Date(a.publishedAt),
     views: a.views,
     featured: a.featured,
     breaking: a.breaking,

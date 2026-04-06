@@ -95,7 +95,7 @@ export default async function AuthorProfilePage({ params }: Props) {
         {/* Author's Articles */}
         <section>
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black text-gray-900 font-playfair border-l-4 border-red-600 pl-4">
+            <h2 className="text-2xl font-black text-gray-900 font-playfair">
               Articles by {author.name}
             </h2>
           </div>

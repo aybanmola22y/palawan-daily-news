@@ -37,12 +37,24 @@ function sanitizeAttrs(tag: string, attrs: string): string {
 export function sanitizeHtml(html: string): string {
   if (!html) return "";
 
-  // Strip script/style blocks entirely
+  // 1. Strip WordPress shortcodes (e.g., [caption]...[/caption], [id...])
+  // We remove the brackets and attributes, but keep the content inside
   let safe = html
+    .replace(/\[caption[^\]]*\]/gi, "")
+    .replace(/\[\/caption\]/gi, "")
+    .replace(/\[[a-z0-9_-]+[^\]]*\]/gi, "") // Generic shortcode stripper [anything]
+    .replace(/\[\/[a-z0-9_-]+\]/gi, "");   // Generic shortcode closer [/anything]
+
+  // 2. Fix fragmented lists. If every paragraph starts with "1. ", 
+  // it's likely a WordPress export artifact where a list was broken up.
+  // We'll leave this for now as it's safer than guessing, but we ensure basic sanitization.
+
+  // 3. Strip script/style blocks entirely
+  safe = safe
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
 
-  // Process all tags
+  // 4. Process all tags
   safe = safe.replace(
     /<\/?([a-zA-Z][a-zA-Z0-9]*)(\s[^>]*)?\s*\/?>/g,
     (match, tagName: string, attrs: string = "") => {

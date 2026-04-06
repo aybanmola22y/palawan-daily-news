@@ -84,7 +84,21 @@ export async function getAds(): Promise<Advertisement[]> {
     if (isSupabaseConfigured) {
         const { data, error } = await supabase.from("ads").select("*").order("id");
         if (!error && data) {
-            return data.map(fromSupabase);
+            const supabaseAds = data.map(fromSupabase);
+            const existingIds = new Set(supabaseAds.map(a => a.id));
+            
+            // Merge in missing mock slots
+            let merged = [...supabaseAds];
+            let changed = false;
+            for (const mockAd of mockAds) {
+                if (!existingIds.has(mockAd.id)) {
+                    merged.push(mockAd);
+                    changed = true;
+                }
+            }
+            
+            // Sort by ID to keep order consistent
+            return merged.sort((a, b) => a.id.localeCompare(b.id));
         }
     }
 

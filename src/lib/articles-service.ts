@@ -167,7 +167,7 @@ async function saveArticles(articles: StoredArticle[]): Promise<boolean> {
   }
 }
 
-export async function getArticles(includeDeleted: boolean = false): Promise<StoredArticle[]> {
+export async function getArticles(includeDeleted: boolean = false, limit: number = 500): Promise<StoredArticle[]> {
   if (isSupabaseConfigured) {
     let query = supabase
       .from("articles")
@@ -177,15 +177,15 @@ export async function getArticles(includeDeleted: boolean = false): Promise<Stor
       query = query.is("deleted_at", null);
     }
 
-    const { data, error } = await query.order("created_at", { ascending: false });
+    const { data, error } = await query
+      .order("published_at", { ascending: false })
+      .limit(limit);
     
     if (!error && data) {
       return data.map(fromSupabase);
     }
     if (error) {
       console.error("Supabase getArticles error:", error);
-      // Return empty array or throw instead of falling back to stale JSON
-      // return []; 
     }
   }
 
@@ -197,35 +197,69 @@ export async function getArticles(includeDeleted: boolean = false): Promise<Stor
 }
 
 export async function getArticlesForFrontend() {
-  const stored = await getArticles();
+  const stored = await getArticles(false, 500);
   return stored.map(fromStored);
 }
 
-export async function getPublishedArticles() {
+export async function getPublishedArticles(limit: number = 200) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*, categories(name, slug)")
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .order("published_at", { ascending: false })
+      .limit(limit);
+
+    if (!error && data) {
+      return data.map(fromSupabase).map(fromStored);
+    }
+    if (error) console.error("Supabase getPublishedArticles error:", error);
+  }
+
+  // Fallback to file/mock
   const all = await getArticlesForFrontend();
   const published = all.filter((a) => {
     if (a.status === "published") return true;
-    if (a.status === "scheduled") {
-      return new Date(a.publishedAt) <= new Date();
-    }
+    if (a.status === "scheduled") return new Date(a.publishedAt) <= new Date();
     return false;
   });
-
-  // Prefer featured (and newer) content first so homepage hero updates when
-  // admins change which article is marked featured.
   published.sort((a, b) => {
     const featuredDiff = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
     if (featuredDiff !== 0) return featuredDiff;
-
-    const breakingDiff = Number(Boolean(b.breaking)) - Number(Boolean(a.breaking));
-    if (breakingDiff !== 0) return breakingDiff;
-
     const timeA = a.publishedAt instanceof Date ? a.publishedAt.getTime() : new Date(a.publishedAt).getTime();
     const timeB = b.publishedAt instanceof Date ? b.publishedAt.getTime() : new Date(b.publishedAt).getTime();
     return timeB - timeA;
   });
+  return published.slice(0, limit);
+}
 
-  return published;
+export async function searchArticles(query: string, limit: number = 100): Promise<any[]> {
+  if (!query) return [];
+  
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*, categories(name, slug)")
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%`)
+      .order("published_at", { ascending: false })
+      .limit(limit);
+
+    if (!error && data) {
+      return data.map(fromSupabase).map(fromStored);
+    }
+    if (error) console.error("Supabase searchArticles error:", error);
+  }
+
+  // Fallback to local filtering
+  const all = await getPublishedArticles(2000);
+  const regex = new RegExp(`\\b${query}\\b`, "i");
+  return all.filter(a => 
+    regex.test(a.title) || 
+    regex.test(a.excerpt)
+  ).slice(0, limit);
 }
 
 export async function getArticleById(id: number) {
@@ -508,22 +542,25 @@ export async function getAuthorById(id: string) {
     };
   }
   
-  // Try to match by name if the ID looks like a name (fallback)
-  const emp = mockOrgChartEmployees.find((e: any) => e.name === id || e.id === id);
-  if (emp) {
+  // Final fallback: If we still haven't found an author but we have a name/id,
+  // return a "virtual" author object so the profile page still works for legacy/guest authors.
+  if (id && typeof id === 'string' && id.length > 2) {
+    // Ensure we decode the ID if it's a name with encoding (e.g., "Lance%20Factor")
+    const decodedName = decodeURIComponent(id);
+    
     return {
-      id: emp.id,
-      name: emp.name,
-      email: emp.name.toLowerCase().replace(/\s+/g, ".") + "@palawandaily.com",
-      role: "writer",
-      avatar_url: emp.avatarUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-      department: emp.department,
-      title: emp.title,
+      id: id,
+      name: decodedName,
+      email: decodedName.toLowerCase().replace(/\s+/g, ".") + "@palawandailynews.com",
+      role: "contributor",
+      avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(decodedName)}&background=random&color=fff`,
+      department: "Editorial",
+      title: "Staff Reporter",
       active: true,
-      created_at: new Date("2024-01-15").toISOString()
+      created_at: new Date("2024-01-01").toISOString()
     };
   }
-  
+
   return null;
 }
 
@@ -536,7 +573,18 @@ export async function getAuthorByName(name: string) {
       .single();
     if (!error && data) return data;
   }
-  return getAuthorById(name); // fallback to ID/name search
+  
+  // Try authors table
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("authors")
+      .select("*")
+      .eq("name", name)
+      .single();
+    if (!error && data) return data;
+  }
+
+  return getAuthorById(name); // fallback to ID/name search which now has the virtual fallback
 }
 
 export async function getArticlesByAuthor(authorId: string) {
@@ -551,8 +599,14 @@ export async function getArticlesByAuthor(authorId: string) {
     if (!error && data) return data.map(fromSupabase).map(fromStored);
   }
   
+  const decodedId = decodeURIComponent(authorId);
   const articles = await getPublishedArticles();
-  return articles.filter(a => a.authorId === authorId || a.authorName === authorId);
+  return articles.filter(a => 
+    String(a.authorId) === String(authorId) || 
+    String(a.authorId) === decodedId ||
+    a.authorName === authorId ||
+    a.authorName === decodedId
+  );
 }
 
 export async function deleteAuthor(id: string) {

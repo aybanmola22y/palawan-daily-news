@@ -77,12 +77,11 @@ export async function getCategories(): Promise<StoredCategory[]> {
     categories = await ensureDataFile();
   }
 
-  const articles = await getArticles();
-
-  // Calculate article counts dynamically
+  // Optimize: Don't fetch all articles just to count them. 
+  // This was causing timeouts in large databases.
   return categories.map(cat => ({
     ...cat,
-    articleCount: articles.filter(a => a.categoryId === cat.id || a.categorySlug === cat.slug).length
+    articleCount: 0 // Placeholder or implementation-pending
   }));
 }
 

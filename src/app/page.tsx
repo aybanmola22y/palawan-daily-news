@@ -38,7 +38,7 @@ export default async function HomePage() {
   const youthArticles = published.filter((a) => a.categorySlug === "youth-campus");
   const internationalArticles = published.filter((a) => a.categorySlug === "international");
   const editorialArticles = published.filter((a) => a.categorySlug === "editorial");
-  const opinionArticles = published.filter((a) => a.categorySlug === "opinion");
+  const opinionArticles = published.filter((a) => ["opinion", "column"].includes(a.categorySlug));
 
   const techArticles = published.filter((a) => a.categorySlug === "technology");
   const businessArticles = published.filter((a) => a.categorySlug === "business");
@@ -46,7 +46,6 @@ export default async function HomePage() {
   const envArticles = published.filter((a) => a.categorySlug === "environment");
 
   const billboardAd = ads.find(ad => ad.id === "home-billboard");
-  const leaderboardAd = ads.find(ad => ad.id === "home-leaderboard");
   const headerAd = ads.find(ad => ad.id === "home-header");
 
   return (
@@ -131,11 +130,20 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <SectionHeader title="Provincial News" color="blue" />
               <div className="flex flex-col gap-6">
-                <ArticleCard article={provincialArticles[0] || published[1]} />
-                <div className="space-y-4">
-                  {provincialArticles[1] && <ArticleCard article={provincialArticles[1]} variant="horizontal" />}
-                  {provincialArticles[2] && <ArticleCard article={provincialArticles[2]} variant="horizontal" />}
-                </div>
+                {provincialArticles.length > 0 ? (
+                  <>
+                    <ArticleCard article={provincialArticles[0]} />
+                    <div className="space-y-4">
+                      {provincialArticles.slice(1, 3).map((a) => (
+                        <ArticleCard key={a.id} article={a} variant="horizontal" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border-2 border-dashed border-gray-100 flex items-center justify-center min-h-[150px]">
+                    <p className="text-gray-400 text-xs italic">No provincial news available right now.</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -143,11 +151,20 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <SectionHeader title="Regional News" color="orange" />
               <div className="flex flex-col gap-6">
-                <ArticleCard article={regionalArticles[0] || published[2]} />
-                <div className="space-y-4">
-                  {regionalArticles[1] && <ArticleCard article={regionalArticles[1]} variant="horizontal" />}
-                  {regionalArticles[2] && <ArticleCard article={regionalArticles[2]} variant="horizontal" />}
-                </div>
+                {regionalArticles.length > 0 ? (
+                  <>
+                    <ArticleCard article={regionalArticles[0]} />
+                    <div className="space-y-4">
+                      {regionalArticles.slice(1, 3).map((a) => (
+                        <ArticleCard key={a.id} article={a} variant="horizontal" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border-2 border-dashed border-gray-100 flex items-center justify-center min-h-[150px]">
+                    <p className="text-gray-400 text-xs italic">Looking for regional stories...</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -155,11 +172,20 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <SectionHeader title="National News" color="slate" />
               <div className="flex flex-col gap-6">
-                <ArticleCard article={nationalArticles[0] || published[3]} />
-                <div className="space-y-4">
-                  {nationalArticles[1] && <ArticleCard article={nationalArticles[1]} variant="horizontal" />}
-                  {nationalArticles[2] && <ArticleCard article={nationalArticles[2]} variant="horizontal" />}
-                </div>
+                {nationalArticles.length > 0 ? (
+                  <>
+                    <ArticleCard article={nationalArticles[0]} />
+                    <div className="space-y-4">
+                      {nationalArticles.slice(1, 3).map((a) => (
+                        <ArticleCard key={a.id} article={a} variant="horizontal" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border-2 border-dashed border-gray-100 flex items-center justify-center min-h-[150px]">
+                    <p className="text-gray-400 text-xs italic">National updates coming soon.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -172,11 +198,20 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <SectionHeader title="International News" color="sky" />
               <div className="flex flex-col gap-6">
-                <ArticleCard article={internationalArticles[0] || published[4]} />
-                <div className="space-y-4">
-                  {internationalArticles[1] && <ArticleCard article={internationalArticles[1]} variant="horizontal" />}
-                  {internationalArticles[2] && <ArticleCard article={internationalArticles[2]} variant="horizontal" />}
-                </div>
+                {internationalArticles.length > 0 ? (
+                  <>
+                    <ArticleCard article={internationalArticles[0]} />
+                    <div className="space-y-4">
+                      {internationalArticles.slice(1, 3).map((a) => (
+                        <ArticleCard key={a.id} article={a} variant="horizontal" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border-2 border-dashed border-gray-100 flex items-center justify-center min-h-[150px]">
+                    <p className="text-gray-400 text-xs italic">No international articles found.</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -184,11 +219,20 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <SectionHeader title="Youth & Campus" color="pink" />
               <div className="flex flex-col gap-6">
-                <ArticleCard article={youthArticles[0] || published[5]} />
-                <div className="space-y-4">
-                  {youthArticles[1] && <ArticleCard article={youthArticles[1]} variant="horizontal" />}
-                  {youthArticles[2] && <ArticleCard article={youthArticles[2]} variant="horizontal" />}
-                </div>
+                {youthArticles.length > 0 ? (
+                  <>
+                    <ArticleCard article={youthArticles[0]} />
+                    <div className="space-y-4">
+                      {youthArticles.slice(1, 3).map((a) => (
+                        <ArticleCard key={a.id} article={a} variant="horizontal" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border-2 border-dashed border-gray-100 flex items-center justify-center min-h-[150px]">
+                    <p className="text-gray-400 text-xs italic">No campus news available.</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -196,15 +240,24 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <SectionHeader title="Editorial" color="indigo" />
               <div className="flex flex-col gap-6">
-                <ArticleCard article={editorialArticles[0] || published[6]} />
-                <div className="space-y-4">
-                  {editorialArticles[1] && <ArticleCard article={editorialArticles[1]} variant="horizontal" />}
-                  {editorialArticles[2] && <ArticleCard article={editorialArticles[2]} variant="horizontal" />}
-                </div>
+                {editorialArticles.length > 0 ? (
+                  <>
+                    <ArticleCard article={editorialArticles[0]} />
+                    <div className="space-y-4">
+                      {editorialArticles.slice(1, 3).map((a) => (
+                        <ArticleCard key={a.id} article={a} variant="horizontal" />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-6 text-center border-2 border-dashed border-gray-100 flex items-center justify-center min-h-[150px]">
+                    <p className="text-gray-400 text-xs italic">No editorials published yet.</p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Opinion */}
+            {/* Opinion & Columns */}
             <div className="flex flex-col">
               <SectionHeader title="Opinion" color="red" />
               <div className="flex flex-col gap-6">
@@ -329,11 +382,7 @@ export default async function HomePage() {
           </aside>
         </div>
 
-        {/* Advertisement Section (Bottom) */}
-        <section className="mt-14 max-w-4xl mx-auto">
-          <AdPlaceholder ad={leaderboardAd} height="400px" />
-          <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em] text-center mt-4">Advertisement</p>
-        </section>
+        {/* Advertisement Section (Bottom) placeholder - removed duplicate */}
 
       </main>
 

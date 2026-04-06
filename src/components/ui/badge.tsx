@@ -28,6 +28,7 @@ const badgeVariants = cva(
         "cat-pink": "border-pink-200 bg-pink-50 text-pink-700 hover:bg-pink-100 uppercase tracking-wider text-[10px]",
         "cat-indigo": "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 uppercase tracking-wider text-[10px]",
         "cat-purple": "border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 uppercase tracking-wider text-[10px]",
+        "cat-amber": "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 uppercase tracking-wider text-[10px]",
       },
     },
     defaultVariants: {
