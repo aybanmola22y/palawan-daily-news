@@ -24,7 +24,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Palawan&apos;s most trusted news source since 1998. Delivering accurate, timely, and impactful journalism for the people of Palawan and beyond.
+              Palawan Daily News is a quad media publishing company owned and published by Alpha Eight Publishing, a registered company in the Philippines through its Department of Trade Industry and the Bureau of Internal Revenue.
             </p>
             <div className="flex gap-3 mt-4">
               <a href="#" className="p-2 bg-gray-800 hover:bg-red-600 rounded-full transition-colors">
