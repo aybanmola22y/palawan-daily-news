@@ -155,23 +155,6 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            <div className="mt-12 pt-10 border-t border-white/[0.05]">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#f36f21] shadow-[0_0_8px_rgba(243,111,33,0.8)]" />
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.25em]">Development Access</p>
-              </div>
-              <div className="grid gap-3">
-                {[
-                  { label: "Super Admin", mail: "admin@palawandaily.com", pass: "admin123" },
-                  { label: "Editor", mail: "editor@palawandaily.com", pass: "editor123" },
-                ].map((cred, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.04] transition-colors hover:bg-white/[0.04]">
-                    <span className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">{cred.label}</span>
-                    <span className="text-slate-300 text-[11px] font-mono break-all">{cred.mail} / {cred.pass}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 

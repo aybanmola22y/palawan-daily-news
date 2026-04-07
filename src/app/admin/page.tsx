@@ -158,7 +158,6 @@ export default async function AdminDashboard() {
                     <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                     <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Author</th>
-                    <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Views</th>
                     <th className="text-right px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -204,12 +203,6 @@ export default async function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                           {article.authorName}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3.5 w-3.5" />
-                            {article.views?.toLocaleString() || 0}
-                          </span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">

@@ -14,7 +14,6 @@ type ArticleRow = {
   author: string;
   date: string;
   publishedAt: Date;
-  views: number;
   featured: boolean;
   breaking: boolean;
 };
@@ -204,7 +203,6 @@ export default function ArticlesTableClient({ articles }: { articles: ArticleRow
                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Category</th>
                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Author</th>
-                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stats</th>
                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -257,11 +255,6 @@ export default function ArticlesTableClient({ articles }: { articles: ArticleRow
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">{article.author}</td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Eye className="h-4 w-4" /> {article.views?.toLocaleString() || 0}
-                        </span>
-                      </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link href={`/news/${article.slug}`} className="p-1.5 text-muted-foreground hover:text-blue-500 hover:bg-muted rounded-lg transition-colors" title="View">

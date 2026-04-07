@@ -40,11 +40,13 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import SmoothScroll from "@/components/public/SmoothScroll";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={cn(inter.variable, playfair.variable, "font-sans", geist.variable)}>
       <body className="font-sans antialiased" suppressHydrationWarning>
+        <SmoothScroll />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

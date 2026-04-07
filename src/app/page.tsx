@@ -5,12 +5,13 @@ import Link from "next/link";
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import ArticleCard from "@/components/public/ArticleCard";
-import { getPublishedArticles } from "@/lib/articles-service";
+import { getPublishedArticles, getTrendingArticles } from "@/lib/articles-service";
 import { getCategories } from "@/lib/categories-service";
 import { getAds } from "@/lib/ads-service";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { TrendingUp, Mail, ArrowRight } from "lucide-react";
+import { TrendingUp, Mail, ArrowRight, BookOpen } from "lucide-react";
+import { calculateReadingTime } from "@/lib/utils";
 import { AdPlaceholder } from "@/components/public/AdPlaceholder";
 import CategoryDropdown from "@/components/public/CategoryDropdown";
 import SectionHeader from "@/components/public/SectionHeader";
@@ -22,15 +23,15 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [published, allCategories, ads] = await Promise.all([
-    getPublishedArticles(),
+  const [published, allCategories, ads, trendingArticles] = await Promise.all([
+    getPublishedArticles({ limit: 500 }),
     getCategories(),
-    getAds()
+    getAds(),
+    getTrendingArticles(5)
   ]);
 
   const featuredArticle = published[0];
   const latestArticles = published.slice(1, 5);
-  const trendingArticles = published.slice(2, 7);
   const cityArticles = published.filter((a) => a.categorySlug === "city-news");
   const provincialArticles = published.filter((a) => a.categorySlug === "provincial-news");
   const regionalArticles = published.filter((a) => a.categorySlug === "regional-news");
@@ -271,11 +272,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Advertisement Section (Pre-Footer) */}
-        <section className="mb-10 w-full">
-          <AdPlaceholder ad={billboardAd} height="250px" />
-        </section>
-
         {/* Main content + sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
@@ -350,7 +346,9 @@ export default async function HomePage() {
                         {article.title}
                       </h4>
                     </Link>
-                    <p className="text-xs text-gray-400 mt-1">{article.views.toLocaleString()} views</p>
+                    <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1.5 font-medium uppercase tracking-tight group-hover:text-red-500 transition-colors">
+                      <BookOpen className="h-2.5 w-2.5" /> {calculateReadingTime(article.content)} min read
+                    </p>
                   </div>
                 </div>
               ))}
@@ -382,7 +380,10 @@ export default async function HomePage() {
           </aside>
         </div>
 
-        {/* Advertisement Section (Bottom) placeholder - removed duplicate */}
+        {/* Advertisement Section (Bottom Billboard) */}
+        <section className="mt-16 mb-12 w-full">
+          <AdPlaceholder ad={billboardAd} height="500px" />
+        </section>
 
       </main>
 

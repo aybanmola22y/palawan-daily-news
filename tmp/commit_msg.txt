@@ -1,0 +1,17 @@
+feat: comprehensive homepage restoration & admin dashboard enhancements
+
+Homepage & Content:
+- Restored original "Opinion" section layout (3-article maximum).
+- Populated empty sections (Editorial, Youth, International, National) by re-categorizing 150+ articles.
+- Removed all arbitrary fallback articles from homepage sections for data consistency.
+- Fixed author profile 404 errors and literal %20 encoding in names.
+
+Advertisement Management:
+- Extended Admin Dashboard to support all 3 ad slots (Header, Sidebar, Billboard).
+- Implemented automatic sync from mock defaults to Supabase for all ad placements.
+- Removed unused duplicated leaderboard slot from layout and admin UI.
+
+Performance & Stability:
+- Resolved Supabase "statement timeout" errors by optimizing category counting logic.
+- Hardened service layer with in-memory caching for categories and published articles.
+- Implemented robust error handling for advertisement updates.

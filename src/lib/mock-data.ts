@@ -77,9 +77,9 @@ export const mockAds: Advertisement[] = [
     id: "home-header",
     type: "header",
     fit: "cover",
-    active: true,
-    label: "Be a certified safety officer",
-    sublabel: "Attend our online and face-to-face training.",
+    label: "Header Advertisement",
+    sublabel: "Advertise with Palawan Daily News",
+    active: false
   },
 ];
 
@@ -143,26 +143,7 @@ export const mockOrgChartDepartments: { slug: OrgChartDepartment; label: string 
   { slug: "online-tv", label: "Online TV" },
 ];
 
-export const mockOrgChartEmployees: OrgChartEmployee[] = [
-  { id: "1", name: "Kent Janaban", title: "Publisher", department: "management", avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "2", name: "Harthwell Capistrano", title: "Editor in Chief / Co-founder", department: "management", avatarUrl: null, facebookUrl: "#" },
-  { id: "3", name: "Clarina Herrera Guludah", title: "Broadcast Journalist / Co-founder", department: "management", avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "4", name: "Rexcel John Sorza", title: "Editorial Consultant", department: "management", avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "5", name: "Atty. Analisa Navarro - Padon", title: "Legal Counsel", department: "management", avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "6", name: "Sevedeo Borda III", title: "Managing Editor", department: "news", avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "7", name: "Hanna Camella Talabucon", title: "Associate Editor", department: "news", avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "8", name: "Gerardo Reyes Jr.", title: "Journalist", department: "news", avatarUrl: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "9", name: "John Castor Viernes", title: "Sales & Marketing / Journalist", department: "news", avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "10", name: "Maria Santos", title: "Senior Journalist", department: "news", avatarUrl: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "11", name: "Mechael Glen Dagot", title: "Circulation Officer", department: "digital", avatarUrl: null, facebookUrl: "#" },
-  { id: "12", name: "Carlos dela Cruz", title: "Digital Content Manager", department: "digital", avatarUrl: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "13", name: "Ana Bautista", title: "Social Media Editor", department: "digital", avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "14", name: "Roberto Cruz", title: "Online Radio Host", department: "online-radio", avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "15", name: "Liza Garcia", title: "Online Radio Producer", department: "online-radio", avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "16", name: "Miguel Torres", title: "Video Producer", department: "creatives", avatarUrl: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "17", name: "Sofia Reyes", title: "Motion Designer", department: "creatives", avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-  { id: "18", name: "Jose Reyes", title: "Online TV Anchor", department: "online-tv", avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face", facebookUrl: "#" },
-];
+export const mockOrgChartEmployees: OrgChartEmployee[] = [];
 
 export const mockPdnOwnershipFundingInfo: PdnOwnershipFundingInfo = {
   title: "Ownership and Funding Information",

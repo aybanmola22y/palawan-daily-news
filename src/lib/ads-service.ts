@@ -82,7 +82,7 @@ async function ensureAdsFile(): Promise<Advertisement[]> {
 
 export async function getAds(): Promise<Advertisement[]> {
     if (isSupabaseConfigured) {
-        const { data, error } = await supabase.from("ads").select("*").order("id");
+        const { data, error } = await supabaseAdmin.from("ads").select("*").order("id");
         if (!error && data) {
             const supabaseAds = data.map(fromSupabase);
             const existingIds = new Set(supabaseAds.map(a => a.id));
@@ -132,7 +132,7 @@ export async function saveAds(ads: Advertisement[]): Promise<boolean> {
 
 export async function getAdById(id: string): Promise<Advertisement | undefined> {
     if (isSupabaseConfigured) {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from("ads")
             .select("*")
             .eq("id", id)

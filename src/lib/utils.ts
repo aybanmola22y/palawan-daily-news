@@ -50,3 +50,12 @@ export function truncate(text: string, length: number): string {
   if (text.length <= length) return text;
   return text.substring(0, length) + "...";
 }
+
+export function calculateReadingTime(content: string): number {
+  const wordsPerMinute = 200;
+  // Remove HTML tags for accurate word count
+  const cleanContent = content.replace(/<[^>]*>/g, "");
+  const words = cleanContent.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
+

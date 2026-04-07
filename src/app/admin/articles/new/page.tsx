@@ -52,17 +52,29 @@ export default function NewArticlePage() {
     authorAvatar: mockOrgChartEmployees[0]?.avatarUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
   });
 
+  const [authors, setAuthors] = useState<any[]>([]);
+  
   useEffect(() => {
-    async function loadCategories() {
+    async function loadData() {
       try {
-        const res = await fetch(`/api/categories?t=${Date.now()}`);
-        const data = await res.json();
-        if (Array.isArray(data)) setCategories(data);
+        const [catRes, authRes] = await Promise.all([
+          fetch(`/api/categories?t=${Date.now()}`),
+          fetch(`/api/authors?t=${Date.now()}`)
+        ]);
+        const cats = await catRes.json();
+        const auths = await authRes.json();
+        if (Array.isArray(cats)) setCategories(cats);
+        if (Array.isArray(auths)) {
+          setAuthors(auths);
+          if (auths.length > 0 && !form.authorName) {
+            setForm(f => ({ ...f, authorName: auths[0].name, authorAvatar: auths[0].avatar_url || auths[0].avatarUrl }));
+          }
+        }
       } catch (e) {
-        console.error("Failed to load categories:", e);
+        console.error("Failed to load data:", e);
       }
     }
-    loadCategories();
+    loadData();
   }, []);
 
   async function handleMediaUpload(file: File): Promise<string | null> {
@@ -293,10 +305,21 @@ export default function NewArticlePage() {
                     <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Author</label>
                     <select
                       value={form.authorName}
-                      onChange={(e) => setForm({ ...form, authorName: e.target.value })}
+                      onChange={(e) => {
+                        const auth = authors.find(a => a.name === e.target.value);
+                        setForm({ 
+                          ...form, 
+                          authorName: e.target.value, 
+                          authorAvatar: auth?.avatar_url || auth?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.target.value)}&background=random&color=fff`
+                        });
+                      }}
                       className="w-full h-10 px-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
-                      {mockOrgChartEmployees.map((emp) => <option key={emp.id} value={emp.name}>{emp.name}</option>)}
+                      <option value="">Select Author</option>
+                      {authors.map((auth) => <option key={auth.id} value={auth.name}>{auth.name}</option>)}
+                      {!authors.some(a => a.name === "Palawan Daily News") && (
+                        <option value="Palawan Daily News">Palawan Daily News (Official)</option>
+                      )}
                     </select>
                   </div>
                   <div>

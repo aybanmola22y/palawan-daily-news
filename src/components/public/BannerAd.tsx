@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { cn } from "@/lib/utils";
+import { Megaphone } from "lucide-react";
 import type { Advertisement } from "@/lib/mock-data";
 
 interface BannerAdProps {
@@ -9,11 +10,40 @@ interface BannerAdProps {
 }
 
 export default function BannerAd({ ad, className }: BannerAdProps) {
-  const isActive = ad?.active;
-  const displayLabel = ad?.label || "Be a certified safety officer";
-  const displaySublabel = ad?.sublabel || "Attend our online and face-to-face training.";
-  const displayImageUrl = ad?.imageUrl || "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=400&fit=crop";
-  const displayLinkUrl = ad?.linkUrl || "https://www.petrosphere.com.ph";
+  if (ad && !ad.active) return null;
+  if (!ad) return null;
+  
+  const isActive = ad.active;
+  const displayLabel = ad.label?.trim() || `${ad.type.toUpperCase()} ADVERTISEMENT SPACE`;
+  const displaySublabel = ad.sublabel?.trim() || "Get your brand in front of thousands of daily readers";
+  const displayImageUrl = ad.imageUrl;
+  const displayLinkUrl = ad.linkUrl || "#";
+
+  if (!displayImageUrl) {
+    const placeholder = (
+      <div className={cn(
+        "w-full h-[120px] sm:h-[150px] bg-gray-50/30 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-4 transition-all group hover:bg-gray-50/50 hover:border-gray-300",
+        className
+      )}>
+        <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-gray-300 mb-3 group-hover:text-gray-400 transition-colors" />
+        <h3 className="text-gray-400 font-bold text-xs sm:text-sm uppercase tracking-widest px-4 text-center">
+          {displayLabel}
+        </h3>
+        <p className="text-gray-400/80 text-[10px] sm:text-xs mt-1.5 text-center max-w-md px-4">
+          {displaySublabel}
+        </p>
+      </div>
+    );
+
+    if (ad.linkUrl) {
+        return (
+          <a href={displayLinkUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
+            {placeholder}
+          </a>
+        );
+    }
+    return placeholder;
+  }
 
   const content = (
     <div className={cn("w-full overflow-hidden rounded-lg shadow-sm border border-gray-100", className)}>
@@ -37,12 +67,14 @@ export default function BannerAd({ ad, className }: BannerAdProps) {
             {displaySublabel}
           </p>
           <div className="text-gray-900 text-[9px] sm:text-xs font-bold mt-1">
-            {ad?.linkUrl && !isActive ? displayLinkUrl : (
-                <span className="opacity-70">Official PDN Partner</span>
+            {ad.linkUrl ? (
+              <span className="opacity-70 truncate block max-w-[200px] sm:max-w-md">{ad.linkUrl}</span>
+            ) : (
+              <span className="opacity-70 italic">Official PDN Partner</span>
             )}
           </div>
           
-          <div className="absolute top-0 right-0 w-12 h-full bg-gradient-to-l from-white/20 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-0 w-12 h-full bg-gradient-to-l from-white/10 to-transparent pointer-events-none" />
         </div>
 
         {/* Right Logo Section */}
@@ -73,7 +105,7 @@ export default function BannerAd({ ad, className }: BannerAdProps) {
     </div>
   );
 
-  if (isActive && displayLinkUrl) {
+  if (isActive && displayLinkUrl && displayLinkUrl !== "#") {
     return (
       <a href={displayLinkUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
         {content}

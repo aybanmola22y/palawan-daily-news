@@ -38,7 +38,7 @@ function toStored(article: (typeof mockArticles)[0]): StoredArticle {
   return {
     ...article,
     authorName: article.authorName,
-    authorAvatar: article.authorAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    authorAvatar: article.authorAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(article.authorName)}&background=random&color=fff`,
     authorId: (article as any).authorId || article.authorName,
     publishedAt: article.publishedAt instanceof Date ? article.publishedAt.toISOString() : article.publishedAt,
     tags: Array.isArray(article.tags) ? article.tags : [],
@@ -64,7 +64,7 @@ function fromSupabase(row: any): StoredArticle {
     categoryName: row.categories?.name || "",
     categorySlug: row.categories?.slug || "",
     authorName: row.author_name || (row.profiles?.name) || "Staff",
-    authorAvatar: row.author_avatar || (row.profiles?.avatar_url) || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    authorAvatar: row.author_avatar || (row.profiles?.avatar_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(row.author_name || "Staff")}&background=random&color=fff`,
     authorId: row.author_id || row.author_name, // Fallback to name for local/mock matching
     status: row.status,
     featured: row.featured,
@@ -167,7 +167,7 @@ async function saveArticles(articles: StoredArticle[]): Promise<boolean> {
   }
 }
 
-export async function getArticles(includeDeleted: boolean = false, limit: number = 500): Promise<StoredArticle[]> {
+export async function getArticles(includeDeleted: boolean = false, limit: number = 2000): Promise<StoredArticle[]> {
   if (isSupabaseConfigured) {
     let query = supabase
       .from("articles")
@@ -196,34 +196,90 @@ export async function getArticles(includeDeleted: boolean = false, limit: number
   return articles;
 }
 
+const SPAM_KEYWORDS = [
+  "casino", "baccarat", "bingo", "slot", "poker", "gambling", 
+  "betting", "blackjack", "slot machine", "online bonus", 
+  "cash collect", "real money", "free spins"
+];
+
 export async function getArticlesForFrontend() {
-  const stored = await getArticles(false, 500);
+  const stored = await getArticles(false, 2000);
   return stored.map(fromStored);
 }
 
-export async function getPublishedArticles(limit: number = 200) {
+export async function getPublishedArticles(options: { limit?: number; categorySlug?: string } = {}) {
+  const limit = options.limit ?? 1000;
+  const { categorySlug } = options;
+
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase
+    const isGlobal = !categorySlug || categorySlug === "all";
+    const selectStr = isGlobal ? "*, categories(name, slug)" : "*, categories!inner(name, slug)";
+    
+    let query = supabase
       .from("articles")
-      .select("*, categories(name, slug)")
+      .select(selectStr)
       .eq("status", "published")
-      .is("deleted_at", null)
+      .is("deleted_at", null);
+
+    if (!isGlobal && categorySlug) {
+      const relatedSlugs = [categorySlug];
+      if (categorySlug === "opinion") relatedSlugs.push("column");
+      if (categorySlug === "column") relatedSlugs.push("opinion");
+      if (categorySlug === "national") relatedSlugs.push("national-news");
+      if (categorySlug === "national-news") relatedSlugs.push("national");
+      if (categorySlug === "legal" || categorySlug === "legal-section") {
+        relatedSlugs.push("legal", "legal-section");
+      }
+
+      query = query.in("categories.slug", [...new Set(relatedSlugs)]);
+    }
+
+    let { data, error } = await query
       .order("published_at", { ascending: false })
       .limit(limit);
 
-    if (!error && data) {
-      return data.map(fromSupabase).map(fromStored);
+    if (error) {
+      console.error("Supabase getPublishedArticles error:", error);
+      // Fall through to fallback
+    } else if (data) {
+      let published = data.map(fromSupabase).map(fromStored);
+      
+      // Local spam filter for safety
+      return published.filter(a => {
+        const t = a.title.toLowerCase();
+        return !SPAM_KEYWORDS.some(k => t.includes(k));
+      });
     }
-    if (error) console.error("Supabase getPublishedArticles error:", error);
   }
 
   // Fallback to file/mock
   const all = await getArticlesForFrontend();
-  const published = all.filter((a) => {
+  let published = all.filter((a) => {
     if (a.status === "published") return true;
     if (a.status === "scheduled") return new Date(a.publishedAt) <= new Date();
     return false;
   });
+
+  if (categorySlug && categorySlug !== "all") {
+    const relatedSlugs = [categorySlug];
+    if (categorySlug === "opinion") relatedSlugs.push("column");
+    if (categorySlug === "column") relatedSlugs.push("opinion");
+    if (categorySlug === "national") relatedSlugs.push("national-news");
+    if (categorySlug === "national-news") relatedSlugs.push("national");
+    if (categorySlug === "legal" || categorySlug === "legal-section") {
+      relatedSlugs.push("legal", "legal-section");
+    }
+
+    const uniqueSlugs = [...new Set(relatedSlugs)];
+    published = published.filter(a => uniqueSlugs.includes(a.categorySlug));
+  }
+
+  // Local spam filter
+  published = published.filter(a => {
+    const t = a.title.toLowerCase();
+    return !SPAM_KEYWORDS.some(k => t.includes(k));
+  });
+
   published.sort((a, b) => {
     const featuredDiff = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
     if (featuredDiff !== 0) return featuredDiff;
@@ -231,6 +287,7 @@ export async function getPublishedArticles(limit: number = 200) {
     const timeB = b.publishedAt instanceof Date ? b.publishedAt.getTime() : new Date(b.publishedAt).getTime();
     return timeB - timeA;
   });
+
   return published.slice(0, limit);
 }
 
@@ -254,7 +311,7 @@ export async function searchArticles(query: string, limit: number = 100): Promis
   }
 
   // Fallback to local filtering
-  const all = await getPublishedArticles(2000);
+  const all = await getPublishedArticles({ limit: 2000 });
   const regex = new RegExp(`\\b${query}\\b`, "i");
   return all.filter(a => 
     regex.test(a.title) || 
@@ -349,7 +406,7 @@ export async function createArticle(input: Partial<StoredArticle>): Promise<Stor
     categoryName: input.categoryName ?? "",
     categorySlug: input.categorySlug ?? "",
     authorName: input.authorName ?? "Staff",
-    authorAvatar: input.authorAvatar ?? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    authorAvatar: input.authorAvatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(input.authorName || "Staff")}&background=random&color=fff`,
     status: input.status ?? "draft",
     featured: input.featured ?? false,
     breaking: input.breaking ?? false,
@@ -527,20 +584,6 @@ export async function getAuthorById(id: string) {
     if (!error && data) return data;
   }
   
-  // Fallback for mock/demo purposes
-  if (id === "author-1") {
-    return {
-      id: "author-1",
-      name: "Staff Reporter",
-      email: "staff@palawandaily.com",
-      role: "writer",
-      avatar_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-      department: "Editorial",
-      title: "Senior Staff Reporter",
-      active: true,
-      created_at: new Date("2024-01-01").toISOString()
-    };
-  }
   
   // Final fallback: If we still haven't found an author but we have a name/id,
   // return a "virtual" author object so the profile page still works for legacy/guest authors.
@@ -600,7 +643,7 @@ export async function getArticlesByAuthor(authorId: string) {
   }
   
   const decodedId = decodeURIComponent(authorId);
-  const articles = await getPublishedArticles();
+  const articles = await getPublishedArticles({ limit: 500 });
   return articles.filter(a => 
     String(a.authorId) === String(authorId) || 
     String(a.authorId) === decodedId ||
@@ -623,21 +666,34 @@ export async function deleteAuthor(id: string) {
   return false;
 }
 
+const MOCK_USER_NAMES = [
+  "Kent Janaban", "Harthwell Capistrano", "Clarina Herrera Guludah", 
+  "Rexcel John Sorza", "Atty. Analisa Navarro - Padon", "Sevedeo Borda III", 
+  "Hanna Camella Talabucon", "Gerardo Reyes Jr.", "John Castor Viernes", 
+  "Maria Santos", "Mechael Glen Dagot", "Carlos dela Cruz", 
+  "Ana Bautista", "Roberto Cruz", "Liza Garcia", 
+  "Miguel Torres", "Sofia Reyes", "Jose Reyes", "Staff Reporter"
+];
+
 export async function getAuthors() {
   if (isSupabaseConfigured) {
     // Try authors table first
-    const { data: authors, error: authorsError } = await supabase
+    let { data: authors, error: authorsError } = await supabase
       .from("authors")
       .select("*");
     
-    if (!authorsError && authors && authors.length > 0) return authors;
+    if (!authorsError && authors && authors.length > 0) {
+      return authors.filter(a => !MOCK_USER_NAMES.includes(a.name));
+    }
     
     // Fallback to profiles
-    const { data: profiles, error: profilesError } = await supabase
+    let { data: profiles, error: profilesError } = await supabase
       .from("profiles")
       .select("*");
     
-    if (!profilesError && profiles) return profiles;
+    if (!profilesError && profiles) {
+      return profiles.filter(p => !MOCK_USER_NAMES.includes(p.name));
+    }
   }
   
   return mockOrgChartEmployees.map(emp => ({
@@ -651,4 +707,68 @@ export async function getAuthors() {
     active: true,
     created_at: new Date("2024-01-15").toISOString()
   }));
+}
+
+export async function incrementArticleViews(slug: string) {
+  if (isSupabaseConfigured) {
+    try {
+      // First find the article ID and current views
+      const { data, error: selectError } = await supabase
+        .from("articles")
+        .select("id, views")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
+      
+      if (data && !selectError) {
+        // Use supabaseAdmin to bypass RLS for incrementing views
+        await supabaseAdmin
+          .from("articles")
+          .update({ views: (data.views || 0) + 1 })
+          .eq("id", data.id);
+      }
+    } catch (err) {
+      console.error("Error incrementing article views:", err);
+    }
+    return;
+  }
+
+  // Local JSON fallback
+  try {
+    const articles = await getArticles();
+    const found = articles.find((a) => a.slug === slug);
+    if (found) {
+      found.views = (found.views || 0) + 1;
+      fs.writeFileSync(DATA_FILE, JSON.stringify(articles, null, 2), "utf-8");
+      // Force cache invalidation
+      cachedArticles = null;
+    }
+  } catch (err) {
+    // ignore
+  }
+}
+
+export async function getTrendingArticles(limit: number = 5) {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*, categories(name, slug)")
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .order("views", { ascending: false })
+      .limit(limit);
+    
+    if (!error && data) {
+      return data.map(fromSupabase).map(fromStored);
+    }
+    if (error) {
+      console.error("Supabase getTrendingArticles error:", error);
+    }
+  }
+
+  // Fallback: Sort published articles by views
+  const all = await getPublishedArticles({ limit: 1000 });
+  return all
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
+    .slice(0, limit);
 }

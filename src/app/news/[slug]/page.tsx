@@ -5,14 +5,14 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import ArticleCard from "@/components/public/ArticleCard";
-import { getPublishedArticles, getArticleBySlug } from "@/lib/articles-service";
+import { getPublishedArticles, getArticleBySlug, incrementArticleViews } from "@/lib/articles-service";
 import { getAds } from "@/lib/ads-service";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { formatDate } from "@/lib/utils";
+import { formatDate, calculateReadingTime } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/utils/security";
 
-import { Clock, Eye } from "lucide-react";
+import { Clock, Eye, BookOpen } from "lucide-react";
 import { AdPlaceholder } from "@/components/public/AdPlaceholder";
 import ShareButtons from "@/components/public/ShareButtons";
 import AuthorHoverCard from "@/components/public/AuthorHoverCard";
@@ -51,6 +51,9 @@ export default async function ArticlePage({ params }: Props) {
   const article = await getArticleBySlug(slug);
   if (!article) notFound();
 
+  // Increment views in the background
+  incrementArticleViews(slug).catch(err => console.error("View count error:", err));
+
   const published = await getPublishedArticles();
 
   // Strictly same category for consistency
@@ -70,6 +73,7 @@ export default async function ArticlePage({ params }: Props) {
 
   const ads = await getAds();
   const sidebarAd = ads.find((ad) => ad.id === "article-sidebar");
+  const billboardAd = ads.find((ad) => ad.id === "home-billboard");
 
   const categoryColors: Record<string, "blue" | "green" | "red" | "orange" | "purple" | "emerald"> = {
     technology: "blue", business: "green", politics: "red",
@@ -79,10 +83,10 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Article */}
-          <article className="lg:col-span-2">
+          <article className="lg:col-span-8">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
               <Link href="/" className="hover:text-red-600">Home</Link>
@@ -127,13 +131,14 @@ export default async function ArticlePage({ params }: Props) {
               </div>
               <Separator orientation="vertical" className="h-8 hidden sm:block" />
               <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
+                <span className="flex items-center gap-1.5 hover:text-red-600 transition-colors">
+                  <Clock className="h-4 w-4 text-red-500" />
                   {formatDate(article.publishedAt)}
                 </span>
-                <span className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  {article.views.toLocaleString()} views
+                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                <span className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-full border border-gray-100 text-gray-600 font-medium whitespace-nowrap">
+                  <BookOpen className="h-3.5 w-3.5 text-red-500" />
+                  {calculateReadingTime(article.content)} min read
                 </span>
               </div>
             </div>
@@ -156,7 +161,7 @@ export default async function ArticlePage({ params }: Props) {
 
             {/* Article content */}
             <div
-              className="article-content prose max-w-none"
+              className="article-content prose max-w-4xl prose-lg prose-red"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
             />
 
@@ -180,7 +185,7 @@ export default async function ArticlePage({ params }: Props) {
           </article>
 
           {/* Sidebar */}
-          <aside className="space-y-6">
+          <aside className="lg:col-span-4 space-y-6">
             <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
               <h3 className="font-bold text-sm uppercase tracking-wider text-gray-900 mb-4">Related Stories</h3>
               <div className="space-y-4">
@@ -229,6 +234,10 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           </section>
         )}
+        {/* Advertisement Section (Bottom Billboard) */}
+        <section className="mt-16 mb-12 w-full">
+          <AdPlaceholder ad={billboardAd} height="500px" />
+        </section>
       </main>
       <Footer />
     </>

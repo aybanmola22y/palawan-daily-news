@@ -20,12 +20,21 @@ export async function POST(request: NextRequest) {
       });
 
       if (!error && data.user) {
-        // Fetch profile to get the role
-        const { data: profile } = await supabase
-          .from("profiles")
+        // Fetch profile to get the role (try authors first, then profiles)
+        let { data: profile } = await supabase
+          .from("authors")
           .select("role, name")
           .eq("id", data.user.id)
           .single();
+
+        if (!profile) {
+          const { data: p } = await supabase
+            .from("profiles")
+            .select("role, name")
+            .eq("id", data.user.id)
+            .single();
+          profile = p;
+        }
 
         const sessionData = JSON.stringify({
           id: data.user.id,

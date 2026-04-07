@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       categoryId: cat?.id ?? 1,
       categoryName: cat?.name ?? catName,
       categorySlug: cat?.slug ?? catSlug,
-      authorName: body.authorName ?? "Staff",
+      authorName: body.authorName || "Palawan Daily News",
       authorAvatar: body.authorAvatar,
       status: body.status ?? "draft",
       featured: body.featured ?? false,

@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Eye } from "lucide-react";
+import { Clock, Eye, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { timeAgo, truncate, cn } from "@/lib/utils";
+import { timeAgo, truncate, cn, calculateReadingTime } from "@/lib/utils";
 import type { MockArticle } from "@/lib/mock-data";
 import { useState } from "react";
 
@@ -14,7 +14,7 @@ interface ArticleCardProps {
   className?: string;
 }
 
-const DEFAULT_AUTHOR_AVATAR = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop";
+const DEFAULT_AUTHOR_AVATAR = null;
 
 // Per-category fallback images — all are high-quality landscape Unsplash photos
 const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
@@ -49,6 +49,7 @@ const CATEGORY_VARIANT_MAP: Record<string, any> = {
   "provincial-news": "cat-blue",
   "regional-news": "cat-orange",
   "national": "cat-slate",
+  "national-news": "cat-slate",
   "international": "cat-sky",
   "youth-campus": "cat-pink",
   "editorial": "cat-indigo",
@@ -62,6 +63,7 @@ const CATEGORY_VARIANT_MAP: Record<string, any> = {
   "tourism": "cat-purple",
   "lifestyle": "cat-pink",
   "advertise": "cat-slate",
+  "legal": "cat-slate",
   "legal-section": "cat-slate",
 };
 
@@ -73,8 +75,8 @@ export default function ArticleCard({ article, variant = "default", className }:
 
   if (variant === "featured") {
     return (
-      <div className="relative overflow-hidden rounded-xl group bg-gray-900">
-        <div className="relative aspect-[4/3] md:aspect-[2/1] lg:aspect-[2.5/1] w-full">
+      <div className="relative overflow-hidden rounded-xl group bg-gray-900 h-full">
+        <div className="relative aspect-[4/3] md:aspect-[2/1] lg:aspect-[1.8/1] w-full">
           <Image
             src={imgSrc}
             alt={article.title}
@@ -108,7 +110,7 @@ export default function ArticleCard({ article, variant = "default", className }:
             <div className="flex items-center gap-1.5">
               <div className="relative h-6 w-6 rounded-full overflow-hidden">
                 <Image 
-                  src={article.authorAvatar || DEFAULT_AUTHOR_AVATAR} 
+                  src={article.authorAvatar || DEFAULT_AUTHOR_AVATAR || `https://ui-avatars.com/api/?name=${encodeURIComponent(article.authorName)}&background=random&color=fff`} 
                   alt={article.authorName} 
                   fill 
                   className="object-cover" 
@@ -116,8 +118,10 @@ export default function ArticleCard({ article, variant = "default", className }:
               </div>
               <span>{article.authorName}</span>
             </div>
-            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {timeAgo(article.publishedAt)}</span>
-            <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {article.views.toLocaleString()}</span>
+            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {timeAgo(article.publishedAt)}</span>
+            <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20 text-[10px] font-medium uppercase tracking-wider">
+              <BookOpen className="h-3 w-3" /> {calculateReadingTime(article.content)} min read
+            </span>
           </div>
         </div>
       </div>
@@ -145,9 +149,16 @@ export default function ArticleCard({ article, variant = "default", className }:
               {article.title}
             </h4>
           </Link>
-          <p className="text-xs text-gray-500 flex items-center gap-1">
-            <Clock className="h-3 w-3" /> {timeAgo(article.publishedAt)}
-          </p>
+          <div className="flex flex-col gap-1 mt-auto pt-1">
+            <span className="text-[9px] font-bold text-red-700 uppercase tracking-tight line-clamp-1 truncate block">
+              {article.authorName || "Staff"}
+            </span>
+            <div className="text-[9px] text-gray-500 flex items-center gap-x-1.5 gap-y-0.5 flex-wrap min-w-0">
+              <span className="flex items-center gap-1 shrink-0"><Clock className="h-2.5 w-2.5" /> {timeAgo(article.publishedAt)}</span>
+              <span className="w-0.5 h-0.5 rounded-full bg-gray-300 shrink-0" />
+              <span className="flex items-center gap-1 shrink-0"><BookOpen className="h-2.5 w-2.5" /> {calculateReadingTime(article.content)} min</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -165,8 +176,8 @@ export default function ArticleCard({ article, variant = "default", className }:
               {article.title}
             </h4>
           </Link>
-          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-            <Eye className="h-3 w-3" /> {article.views.toLocaleString()} views
+          <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1.5 font-medium uppercase tracking-tight">
+            <BookOpen className="h-3 w-3 text-red-400" /> {calculateReadingTime(article.content)} min read
           </p>
         </div>
       </div>
@@ -190,15 +201,12 @@ export default function ArticleCard({ article, variant = "default", className }:
         )}
       </div>
       <div className="p-4 flex flex-col flex-grow">
-        <div className="flex items-center justify-between mb-3">
-          <Badge variant={CATEGORY_VARIANT_MAP[article.categorySlug] || "unified"} className="text-[10px]">
+        <div className="flex items-center justify-between mb-2 min-w-0">
+          <Badge variant={CATEGORY_VARIANT_MAP[article.categorySlug] || "unified"} className="text-[9px] px-1.5 py-0">
             {article.categoryName}
           </Badge>
-          <span className="text-xs text-gray-500 flex items-center gap-1">
-            <Clock className="h-3 w-3" /> {timeAgo(article.publishedAt)}
-          </span>
         </div>
-        <div className="flex-grow">
+        <div className="flex-grow flex flex-col">
           <Link href={`/news/${article.slug}`}>
             <h3 className="font-playfair font-bold text-gray-900 hover:text-red-600 transition-colors leading-snug mb-3 line-clamp-2 min-h-[2.5rem]">
               {article.title}
@@ -208,9 +216,17 @@ export default function ArticleCard({ article, variant = "default", className }:
             {article.excerpt}
           </p>
         </div>
-        <div className="flex items-center justify-between text-xs text-gray-400 mt-auto pt-2 border-t border-gray-50">
-          <span className="font-medium">{article.authorName}</span>
-          <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {article.views.toLocaleString()}</span>
+        <div className="flex flex-col gap-1 mt-auto pt-2 border-t border-gray-50">
+          <span className="text-[9px] font-bold text-red-700 uppercase tracking-tight truncate block">
+            {article.authorName || "Staff"}
+          </span>
+          <div className="flex items-center gap-2 text-[9px] text-gray-400">
+            <span className="flex items-center gap-1 whitespace-nowrap"><Clock className="h-2.5 w-2.5" /> {timeAgo(article.publishedAt)}</span>
+            <span className="w-0.5 h-0.5 rounded-full bg-gray-200" />
+            <span className="flex items-center gap-1 whitespace-nowrap">
+              <BookOpen className="h-2.5 w-2.5" /> {calculateReadingTime(article.content)} min
+            </span>
+          </div>
         </div>
       </div>
     </div>

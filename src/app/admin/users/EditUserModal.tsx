@@ -37,14 +37,6 @@ interface EditUserModalProps {
   };
 }
 
-const PREDEFINED_AVATARS = [
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-];
 
 export default function EditUserModal({ user }: EditUserModalProps) {
   const router = useRouter();
@@ -127,8 +119,10 @@ export default function EditUserModal({ user }: EditUserModalProps) {
                 {formData.avatar_url ? (
                   <Image src={formData.avatar_url} alt="Avatar" fill className="object-cover" />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center text-xl font-bold text-gray-300">
-                    {formData.name[0]}
+                  <div className="h-full w-full flex items-center justify-center bg-muted">
+                    <span className="text-xl font-bold text-muted-foreground">
+                      {formData.name[0]}
+                    </span>
                   </div>
                 )}
                 {isUploading && (
@@ -137,25 +131,6 @@ export default function EditUserModal({ user }: EditUserModalProps) {
                   </div>
                 )}
               </div>
-
-              {/* Predefined Choices */}
-              {PREDEFINED_AVATARS.map((url, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, avatar_url: url })}
-                  className={`relative h-10 w-10 rounded-lg overflow-hidden border-2 transition-all ${
-                    formData.avatar_url === url ? "border-red-600 scale-110 shadow-md" : "border-transparent opacity-60 hover:opacity-100"
-                  }`}
-                >
-                  <Image src={url} alt={`Option ${i}`} fill className="object-cover" />
-                  {formData.avatar_url === url && (
-                    <div className="absolute inset-0 bg-red-600/20 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-red-600" strokeWidth={3} />
-                    </div>
-                  )}
-                </button>
-              ))}
 
               {/* Custom Upload */}
               <button

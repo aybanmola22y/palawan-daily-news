@@ -11,13 +11,19 @@ const departments: { slug: OrgChartDepartment | "all"; label: string }[] = [
   ...mockOrgChartDepartments,
 ];
 
-export default function WhoWeAre() {
+interface WhoWeAreProps {
+  initialAuthors?: any[];
+}
+
+export default function WhoWeAre({ initialAuthors = [] }: WhoWeAreProps) {
   const [filter, setFilter] = useState<OrgChartDepartment | "all">("all");
+
+  const authors = initialAuthors.length > 0 ? initialAuthors : mockOrgChartEmployees;
 
   const filtered =
     filter === "all"
-      ? mockOrgChartEmployees
-      : mockOrgChartEmployees.filter((e) => e.department === filter);
+      ? authors
+      : authors.filter((e) => e.department === filter);
 
   return (
     <section className="mt-16 pt-16 border-t border-gray-200/80">
@@ -64,21 +70,27 @@ export default function WhoWeAre() {
   );
 }
 
-function EmployeeCard({ employee }: { employee: OrgChartEmployee }) {
+function EmployeeCard({ employee }: { employee: any }) {
+  const avatar = employee.avatarUrl || employee.avatar_url;
   return (
     <article className="group flex gap-5 p-5 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all duration-300">
       <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-gray-100 ring-1 ring-gray-100">
-        {employee.avatarUrl ? (
+        {avatar ? (
           <Image
-            src={employee.avatarUrl}
+            src={avatar}
             alt={employee.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="80px"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-400 group-hover:text-[#f36f21] transition-colors">
-            {employee.name.charAt(0)}
+          <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-400 group-hover:text-[#f36f21] transition-colors relative overflow-hidden">
+            <Image 
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=random&color=fff`}
+              alt={employee.name}
+              fill
+              className="object-cover"
+            />
           </div>
         )}
       </div>

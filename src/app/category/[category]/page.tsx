@@ -46,10 +46,10 @@ export default async function CategoryPage({ params }: Props) {
   
   if (!cat) notFound();
 
-  const published = await getPublishedArticles();
-  const articles = isAll 
-    ? published 
-    : published.filter((a) => a.categorySlug === category);
+  const articles = await getPublishedArticles({ 
+    categorySlug: category, 
+    limit: category === "all" ? 1000 : 500 
+  });
 
   const colorMap: Record<string, string> = {
     technology: "bg-blue-600",

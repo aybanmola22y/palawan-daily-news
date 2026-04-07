@@ -22,12 +22,16 @@ export function AdPlaceholder({
 }: AdPlaceholderProps) {
     const displayLabel = ad?.label || label || "ADVERTISEMENT SPACE";
     const displaySublabel = ad?.sublabel || sublabel;
+    
+    // If ad is explicitly provided and inactive, hide it.
+    if (ad && !ad.active) return null;
+    
     const isActive = ad?.active && ad?.imageUrl;
 
     const content = (
         <div
             className={cn(
-                "bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-center p-6 overflow-hidden relative transition-all duration-300",
+                "bg-gray-50 border-2 border-dashed border-gray-200 rounded-sm flex flex-col items-center justify-center text-center p-6 overflow-hidden relative transition-all duration-300",
                 isActive && "border-none bg-white shadow-sm p-0",
                 className
             )}

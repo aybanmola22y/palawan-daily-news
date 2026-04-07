@@ -49,17 +49,24 @@ export default function EditArticlePage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
+  const [authors, setAuthors] = useState<any[]>([]);
+
   useEffect(() => {
-    async function loadCategories() {
+    async function loadInitialData() {
       try {
-        const res = await fetch(`/api/categories?t=${Date.now()}`);
-        const data = await res.json();
-        if (Array.isArray(data)) setCategories(data);
+        const [catRes, authRes] = await Promise.all([
+          fetch(`/api/categories?t=${Date.now()}`),
+          fetch(`/api/authors?t=${Date.now()}`)
+        ]);
+        const cats = await catRes.json();
+        const auths = await authRes.json();
+        if (Array.isArray(cats)) setCategories(cats);
+        if (Array.isArray(auths)) setAuthors(auths);
       } catch (e) {
-        console.error("Failed to load categories:", e);
+        console.error("Failed to load initial data:", e);
       }
     }
-    loadCategories();
+    loadInitialData();
   }, []);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -437,13 +444,25 @@ export default function EditArticlePage() {
                 <h3 className="font-bold text-foreground mb-4 uppercase tracking-widest text-xs">Author Profile</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Author Name</label>
-                    <input
-                      type="text"
+                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Author</label>
+                    <select
                       value={form.authorName}
-                      onChange={(e) => setForm({ ...form, authorName: e.target.value })}
+                      onChange={(e) => {
+                        const auth = authors.find(a => a.name === e.target.value);
+                        setForm({ 
+                          ...form, 
+                          authorName: e.target.value, 
+                          authorAvatar: auth?.avatar_url || auth?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.target.value)}&background=random&color=fff`
+                        });
+                      }}
                       className="w-full h-10 px-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
-                    />
+                    >
+                      <option value="">Select Author</option>
+                      {authors.map((auth) => <option key={auth.id} value={auth.name}>{auth.name}</option>)}
+                      {!authors.some(a => a.name === "Palawan Daily News") && (
+                        <option value="Palawan Daily News">Palawan Daily News (Official)</option>
+                      )}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Author Avatar URL</label>

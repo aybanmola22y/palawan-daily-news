@@ -24,7 +24,6 @@ export default async function ArticlesPage() {
     author: a.authorName,
     date: formatDate(a.publishedAt),
     publishedAt: new Date(a.publishedAt),
-    views: a.views,
     featured: a.featured,
     breaking: a.breaking,
   }));

@@ -94,32 +94,43 @@ export default function AdminSidebar({ user }: Props) {
         ))}
       </nav>
 
-      {/* User */}
+      {/* User & Settings */}
       {user && (
-        <div className="p-3 border-t border-sidebar-border bg-sidebar/50 backdrop-blur-sm">
+        <div className="p-3 border-t border-sidebar-border space-y-3 bg-sidebar/30 backdrop-blur-md">
           {!collapsed && (
-            <div className="px-3 py-2 mb-2 bg-muted/30 rounded-xl border border-border/50 space-y-2">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-white/10 text-white">
-                  <span className="text-xs font-bold font-mono">{user.name[0]}</span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-foreground truncate">{user.name}</p>
-                  <p className="text-[10px] text-muted-foreground capitalize font-mono">{user.role.replace("_", " ")}</p>
+            <>
+              {/* User Card */}
+              <div className="px-3 py-2.5 bg-sidebar-accent/30 rounded-xl border border-sidebar-border/50 shadow-sm transition-all hover:bg-sidebar-accent/50 group">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 bg-linear-to-tr from-red-600 to-red-400 rounded-full flex items-center justify-center shrink-0 shadow-md border-2 border-white/20 text-white transform transition-transform group-hover:scale-105">
+                    <span className="text-sm font-bold font-playfair">{user.name[0]}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold text-foreground truncate leading-none mb-1">{user.name}</p>
+                    <p className="text-[10px] text-muted-foreground/80 uppercase tracking-widest font-mono font-medium">{user.role.replace("_", " ")}</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">Theme</span>
+
+              {/* Theme Toggle Card */}
+              <div className="px-4 py-2.5 bg-sidebar-accent/20 rounded-xl border border-sidebar-border/30 flex items-center justify-between transition-all hover:border-sidebar-border/60">
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-muted-foreground/60 uppercase tracking-[0.2em] font-bold">System</span>
+                  <span className="text-[11px] font-bold text-foreground/80">Appearance</span>
+                </div>
                 <ThemeToggle />
               </div>
-            </div>
+            </>
           )}
+
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2 text-sm text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors font-medium group"
+            className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all duration-300 font-medium group active:scale-95"
           >
-            <LogOut className="h-4 w-4 shrink-0 group-hover:rotate-12 transition-transform" />
-            {!collapsed && <span className="uppercase tracking-widest text-[10px] font-bold">Sign Out</span>}
+            <div className="bg-muted/40 p-1.5 rounded-lg group-hover:bg-red-500/10 transition-colors">
+              <LogOut className="h-3.5 w-3.5 shrink-0 group-hover:rotate-12 transition-transform" />
+            </div>
+            {!collapsed && <span className="uppercase tracking-widest text-[9px] font-black">Sign Out</span>}
           </button>
         </div>
       )}

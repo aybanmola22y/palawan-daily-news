@@ -1,11 +1,12 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 export const dynamic = "force-dynamic";
-import { PlusCircle, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 import { getArticlesForFrontend, getAuthors } from "@/lib/articles-service";
 import DeleteUserButton from "./DeleteUserButton";
 import EditUserModal from "./EditUserModal";
-
-const demoUser = { name: "Demo Admin", email: "admin@palawandaily.com", role: "super_admin" };
+import InviteUserModal from "./InviteUserModal";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const roleConfig: Record<string, { label: string; className: string }> = {
   super_admin: { label: "Super Admin", className: "bg-red-100 text-red-700" },
@@ -14,6 +15,9 @@ const roleConfig: Record<string, { label: string; className: string }> = {
 };
 
 export default async function UsersPage() {
+  const session = await getSession();
+  if (!session) redirect("/admin/login");
+
   const articles = await getArticlesForFrontend();
   const rawUsers = await getAuthors();
   
@@ -29,24 +33,21 @@ export default async function UsersPage() {
       title: user.title,
       active: user.active ?? true,
       articles: userArticlesCount,
-      createdAt: new Date(user.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      createdAt: new Date(user.created_at || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       avatar: user.avatar_url
     };
   });
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <AdminSidebar user={demoUser} />
+      <AdminSidebar user={session as any} />
       <main className="flex-1 overflow-auto">
         <div className="bg-card border-b border-border px-8 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">Users</h1>
             <p className="text-sm text-muted-foreground">Manage team members and roles</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
-            <PlusCircle className="h-4 w-4" />
-            Invite User
-          </button>
+          <InviteUserModal />
         </div>
 
         <div className="p-8">
@@ -86,7 +87,7 @@ export default async function UsersPage() {
               </thead>
               <tbody className="divide-y divide-border/50">
                 {users.map((user) => {
-                  const role = roleConfig[user.role];
+                  const role = roleConfig[user.role] || { label: user.role, className: "bg-gray-100 text-gray-700" };
                   return (
                     <tr key={user.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-6 py-4">

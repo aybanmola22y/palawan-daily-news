@@ -9,12 +9,16 @@ export function middleware(request: NextRequest) {
   response.headers.set("Content-Security-Policy", "frame-ancestors 'none'");
 
   // 2. Admin Route Protection
-  const isAdminRoute = pathname.startsWith("/admin") && pathname !== "/admin/login";
-  if (isAdminRoute) {
-    const session = request.cookies.get("session");
-    if (!session) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
+  const session = request.cookies.get("session");
+  const isLoginPage = pathname === "/admin/login";
+  const isAdminRoute = pathname.startsWith("/admin") && !isLoginPage;
+
+  if (isAdminRoute && !session) {
+    return NextResponse.redirect(new URL("/admin/login", request.url));
+  }
+
+  if (isLoginPage && session) {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return response;

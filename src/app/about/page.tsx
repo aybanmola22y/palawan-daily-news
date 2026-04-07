@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
+import { getAuthors } from "@/lib/articles-service";
 import WhoWeAre from "@/components/public/WhoWeAre";
 import { Target, Eye, Shield, Users, Award, TrendingUp, CheckCircle2 } from "lucide-react";
 
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
   description: "Learn about the mission, vision, and values of Palawan's premier news source.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const authors = await getAuthors();
+  
   return (
     <>
       <Navbar />
@@ -114,7 +117,7 @@ export default function AboutPage() {
           </section>
 
           {/* Team Section */}
-          <WhoWeAre />
+          <WhoWeAre initialAuthors={authors} />
         </section>
       </main>
       <Footer />
