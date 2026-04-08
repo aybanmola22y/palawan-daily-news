@@ -10,7 +10,7 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-flex flex-col items-start mb-4">
               <div className="text-[7px] font-medium tracking-[0.15em] text-gray-500 uppercase pb-0.5">
-                Trusted, Fair & Balanced Reporting
+                Trusted and Fair Quad Media Network in MIMAROPA
               </div>
               <div className="font-playfair font-black text-xl sm:text-2xl leading-none tracking-tight">
                 <span className="text-white">Palawan</span>

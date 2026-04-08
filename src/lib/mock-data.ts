@@ -34,6 +34,7 @@ export const mockArticles: {
   categorySlug: string;
   authorName: string;
   authorAvatar: string;
+  authorId?: string;
   status: string;
   featured: boolean;
   breaking: boolean;

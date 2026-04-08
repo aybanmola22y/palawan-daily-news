@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { mockArticles, mockOrgChartEmployees } from "./mock-data";
 import { supabase, isSupabaseConfigured, supabaseAdmin } from "./supabase";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 export interface StoredArticle {
   id: number;
@@ -208,8 +209,12 @@ export async function getArticlesForFrontend() {
 }
 
 export async function getPublishedArticles(options: { limit?: number; categorySlug?: string } = {}) {
-  const limit = options.limit ?? 1000;
-  const { categorySlug } = options;
+  const cacheKey = `published-articles-${options.limit ?? 1000}-${options.categorySlug ?? 'all'}`;
+  
+  return unstable_cache(
+    async () => {
+      const limit = options.limit ?? 1000;
+      const { categorySlug } = options;
 
   if (isSupabaseConfigured) {
     const isGlobal = !categorySlug || categorySlug === "all";
@@ -288,7 +293,11 @@ export async function getPublishedArticles(options: { limit?: number; categorySl
     return timeB - timeA;
   });
 
-  return published.slice(0, limit);
+      return published.slice(0, limit);
+    },
+    [cacheKey],
+    { tags: ['articles'], revalidate: 3600 }
+  )();
 }
 
 export async function searchArticles(query: string, limit: number = 100): Promise<any[]> {
@@ -311,7 +320,7 @@ export async function searchArticles(query: string, limit: number = 100): Promis
   }
 
   // Fallback to local filtering
-  const all = await getPublishedArticles({ limit: 2000 });
+  const all = await getPublishedArticles({ limit: 100 });
   const regex = new RegExp(`\\b${query}\\b`, "i");
   return all.filter(a => 
     regex.test(a.title) || 
@@ -377,6 +386,7 @@ export async function createArticle(input: Partial<StoredArticle>): Promise<Stor
       .single();
     
     if (!error && data) {
+      revalidateTag('articles');
       const { revalidatePath } = await import("next/cache");
       revalidatePath("/");
       revalidatePath("/admin/articles");
@@ -443,6 +453,7 @@ export async function updateArticle(id: number | string, updates: Partial<Stored
       .eq("id", id);
     
     if (!error) {
+      revalidateTag('articles');
       const { revalidatePath } = await import("next/cache");
       revalidatePath("/");
       revalidatePath("/admin/articles");
@@ -488,7 +499,10 @@ export async function deleteArticle(id: number | string): Promise<boolean> {
       .from("articles")
       .delete()
       .eq("id", id);
-    if (!error) return true;
+    if (!error) {
+      revalidateTag('articles');
+      return true;
+    }
     console.error("Supabase deleteArticle (physical move to trash) error:", error);
     return false;
   }
@@ -643,7 +657,7 @@ export async function getArticlesByAuthor(authorId: string) {
   }
   
   const decodedId = decodeURIComponent(authorId);
-  const articles = await getPublishedArticles({ limit: 500 });
+  const articles = await getPublishedArticles({ limit: 100 });
   return articles.filter(a => 
     String(a.authorId) === String(authorId) || 
     String(a.authorId) === decodedId ||
@@ -749,7 +763,9 @@ export async function incrementArticleViews(slug: string) {
 }
 
 export async function getTrendingArticles(limit: number = 5) {
-  if (isSupabaseConfigured) {
+  return unstable_cache(
+    async () => {
+      if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from("articles")
       .select("*, categories(name, slug)")
@@ -767,8 +783,12 @@ export async function getTrendingArticles(limit: number = 5) {
   }
 
   // Fallback: Sort published articles by views
-  const all = await getPublishedArticles({ limit: 1000 });
-  return all
-    .sort((a, b) => (b.views || 0) - (a.views || 0))
-    .slice(0, limit);
+  const all = await getPublishedArticles({ limit: 100 });
+    return all
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, limit);
+    },
+    [`trending-articles-${limit}`],
+    { tags: ['articles'], revalidate: 3600 }
+  )();
 }

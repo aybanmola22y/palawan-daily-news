@@ -47,7 +47,7 @@ export default function Navbar() {
             <div className="flex-1 flex items-center justify-start">
               <Link href="/" className="flex flex-col items-center justify-center shrink-0 pt-1 pb-1">
                 <div className="text-[7px] font-medium tracking-[0.15em] text-gray-500 uppercase pb-0.5 sm:text-[8px]">
-                  Trusted, Fair & Balanced Reporting
+                  Trusted and Fair Quad Media Network in MIMAROPA
                 </div>
                 <div className="font-playfair font-black text-2xl sm:text-3xl leading-none tracking-tight">
                   <span className="text-gray-900">Palawan</span>

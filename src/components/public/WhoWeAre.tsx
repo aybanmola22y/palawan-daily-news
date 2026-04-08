@@ -86,7 +86,7 @@ function EmployeeCard({ employee }: { employee: any }) {
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-400 group-hover:text-[#f36f21] transition-colors relative overflow-hidden">
             <Image 
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=random&color=fff`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=f36f21&color=fff`}
               alt={employee.name}
               fill
               className="object-cover"

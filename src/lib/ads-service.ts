@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { mockAds, type Advertisement } from "./mock-data";
 import { supabase, isSupabaseConfigured, supabaseAdmin } from "./supabase";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 function fromSupabase(row: any): Advertisement {
     return {
@@ -81,33 +82,37 @@ async function ensureAdsFile(): Promise<Advertisement[]> {
 }
 
 export async function getAds(): Promise<Advertisement[]> {
-    if (isSupabaseConfigured) {
-        const { data, error } = await supabaseAdmin.from("ads").select("*").order("id");
-        if (!error && data) {
-            const supabaseAds = data.map(fromSupabase);
-            const existingIds = new Set(supabaseAds.map(a => a.id));
-            
-            // Merge in missing mock slots
-            let merged = [...supabaseAds];
-            let changed = false;
-            for (const mockAd of mockAds) {
-                if (!existingIds.has(mockAd.id)) {
-                    merged.push(mockAd);
-                    changed = true;
+    return unstable_cache(
+        async () => {
+            if (isSupabaseConfigured) {
+                const { data, error } = await supabaseAdmin.from("ads").select("*").order("id");
+                if (!error && data) {
+                    const supabaseAds = data.map(fromSupabase);
+                    const existingIds = new Set(supabaseAds.map(a => a.id));
+                    
+                    // Merge in missing mock slots
+                    let merged = [...supabaseAds];
+                    for (const mockAd of mockAds) {
+                        if (!existingIds.has(mockAd.id)) {
+                            merged.push(mockAd);
+                        }
+                    }
+                    
+                    // Sort by ID to keep order consistent
+                    return merged.sort((a, b) => a.id.localeCompare(b.id));
                 }
             }
-            
-            // Sort by ID to keep order consistent
-            return merged.sort((a, b) => a.id.localeCompare(b.id));
-        }
-    }
 
-    try {
-        return await ensureAdsFile();
-    } catch (error) {
-        console.error("Error reading ads data:", error);
-        return [];
-    }
+            try {
+                return await ensureAdsFile();
+            } catch (error) {
+                console.error("Error reading ads data:", error);
+                return [];
+            }
+        },
+        ['ads'],
+        { tags: ['ads'], revalidate: 3600 }
+    )();
 }
 
 export async function saveAds(ads: Advertisement[]): Promise<boolean> {
@@ -161,6 +166,7 @@ export async function updateAd(id: string, updates: Partial<Advertisement>): Pro
             .eq("id", id);
         
         if (!error) {
+            revalidateTag('ads');
             const { revalidatePath } = await import("next/cache");
             revalidatePath("/");
             revalidatePath("/admin/ads");
@@ -172,7 +178,10 @@ export async function updateAd(id: string, updates: Partial<Advertisement>): Pro
              const { error: insertError } = await supabaseAdmin
                 .from("ads")
                 .upsert({ id, ...payload });
-             if (!insertError) return true;
+             if (!insertError) {
+                 revalidateTag('ads');
+                 return true;
+             }
         }
         
         console.error("Supabase updateAd error:", error);
@@ -190,7 +199,10 @@ export async function updateAd(id: string, updates: Partial<Advertisement>): Pro
 export async function deleteAd(id: string): Promise<boolean> {
     if (isSupabaseConfigured) {
         const { error } = await supabaseAdmin.from("ads").delete().eq("id", id);
-        if (!error) return true;
+        if (!error) {
+            revalidateTag('ads');
+            return true;
+        }
         console.error("Supabase deleteAd error:", error);
         return false;
     }

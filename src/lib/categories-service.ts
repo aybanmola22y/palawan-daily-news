@@ -3,6 +3,7 @@ import path from "path";
 import { mockCategories } from "./mock-data";
 import { getArticles } from "./articles-service";
 import { supabase, isSupabaseConfigured, supabaseAdmin } from "./supabase";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 export interface StoredCategory {
   id: number;
@@ -64,25 +65,31 @@ async function saveCategories(categories: StoredCategory[]): Promise<boolean> {
 }
 
 export async function getCategories(): Promise<StoredCategory[]> {
-  let categories: StoredCategory[] = [];
+  return unstable_cache(
+    async () => {
+      let categories: StoredCategory[] = [];
 
-  if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from("categories").select("*").order("name");
-    if (!error && data) {
-      categories = data.map(fromSupabase);
-    }
-  }
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.from("categories").select("*").order("name");
+        if (!error && data) {
+          categories = data.map(fromSupabase);
+        }
+      }
 
-  if (categories.length === 0) {
-    categories = await ensureDataFile();
-  }
+      if (categories.length === 0) {
+        categories = await ensureDataFile();
+      }
 
-  // Optimize: Don't fetch all articles just to count them. 
-  // This was causing timeouts in large databases.
-  return categories.map(cat => ({
-    ...cat,
-    articleCount: 0 // Placeholder or implementation-pending
-  }));
+      // Optimize: Don't fetch all articles just to count them. 
+      // This was causing timeouts in large databases.
+      return categories.map(cat => ({
+        ...cat,
+        articleCount: 0 // Placeholder or implementation-pending
+      }));
+    },
+    ['categories'],
+    { tags: ['categories'], revalidate: 3600 }
+  )();
 }
 
 export async function createCategory(input: Partial<StoredCategory>): Promise<StoredCategory | null> {
@@ -98,7 +105,10 @@ export async function createCategory(input: Partial<StoredCategory>): Promise<St
       .select()
       .single();
     
-    if (!error && data) return fromSupabase(data);
+    if (!error && data) {
+      revalidateTag('categories');
+      return fromSupabase(data);
+    }
     if (error) {
       console.error("Supabase createCategory error:", error);
       return null; // Don't fall back to JSON if Supabase is configured
@@ -130,7 +140,10 @@ export async function updateCategory(id: number | string, updates: Partial<Store
         color: updates.color,
       })
       .eq("id", id);
-    if (!error) return true;
+    if (!error) {
+      revalidateTag('categories');
+      return true;
+    }
     console.error("Supabase updateCategory error:", error);
     return false; // Don't fall back to JSON if Supabase is configured
   }
@@ -145,7 +158,10 @@ export async function updateCategory(id: number | string, updates: Partial<Store
 export async function deleteCategory(id: number | string): Promise<boolean> {
   if (isSupabaseConfigured) {
     const { error } = await supabaseAdmin.from("categories").delete().eq("id", id);
-    if (!error) return true;
+    if (!error) {
+      revalidateTag('categories');
+      return true;
+    }
     console.error("Supabase deleteCategory error:", error);
     return false; // Don't fall back to JSON if Supabase is configured
   }

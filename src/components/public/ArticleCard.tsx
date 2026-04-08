@@ -14,6 +14,16 @@ interface ArticleCardProps {
   className?: string;
 }
 
+// Renders author name as a link if authorId is present
+function AuthorLink({ authorId, authorName, className }: { authorId?: string; authorName: string; className?: string }) {
+  if (!authorId) return <span className={className}>{authorName}</span>;
+  return (
+    <Link href={`/author/${encodeURIComponent(authorId)}`} className={cn("hover:text-red-400 transition-colors", className)} onClick={(e) => e.stopPropagation()}>
+      {authorName}
+    </Link>
+  );
+}
+
 const DEFAULT_AUTHOR_AVATAR = null;
 
 // Per-category fallback images — all are high-quality landscape Unsplash photos
@@ -110,15 +120,15 @@ export default function ArticleCard({ article, variant = "default", className }:
             <div className="flex items-center gap-1.5">
               <div className="relative h-6 w-6 rounded-full overflow-hidden">
                 <Image 
-                  src={article.authorAvatar || DEFAULT_AUTHOR_AVATAR || `https://ui-avatars.com/api/?name=${encodeURIComponent(article.authorName)}&background=random&color=fff`} 
+                  src={article.authorAvatar || DEFAULT_AUTHOR_AVATAR || `https://ui-avatars.com/api/?name=${encodeURIComponent(article.authorName)}&background=f36f21&color=fff`} 
                   alt={article.authorName} 
                   fill 
                   className="object-cover" 
                 />
               </div>
-              <span>{article.authorName}</span>
+              <AuthorLink authorId={article.authorId} authorName={article.authorName} className="text-gray-300 hover:text-red-300" />
             </div>
-            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {timeAgo(article.publishedAt)}</span>
+            <span className="flex items-center gap-1.5" suppressHydrationWarning><Clock className="h-3.5 w-3.5" /> {timeAgo(article.publishedAt)}</span>
             <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/20 text-[10px] font-medium uppercase tracking-wider">
               <BookOpen className="h-3 w-3" /> {calculateReadingTime(article.content)} min read
             </span>
@@ -150,11 +160,9 @@ export default function ArticleCard({ article, variant = "default", className }:
             </h4>
           </Link>
           <div className="flex flex-col gap-1 mt-auto pt-1">
-            <span className="text-[9px] font-bold text-red-700 uppercase tracking-tight line-clamp-1 truncate block">
-              {article.authorName || "Staff"}
-            </span>
+            <AuthorLink authorId={article.authorId} authorName={article.authorName || "Staff"} className="text-[9px] font-bold text-red-700 uppercase tracking-tight line-clamp-1 truncate block" />
             <div className="text-[9px] text-gray-500 flex items-center gap-x-1.5 gap-y-0.5 flex-wrap min-w-0">
-              <span className="flex items-center gap-1 shrink-0"><Clock className="h-2.5 w-2.5" /> {timeAgo(article.publishedAt)}</span>
+              <span className="flex items-center gap-1 shrink-0" suppressHydrationWarning><Clock className="h-2.5 w-2.5" /> {timeAgo(article.publishedAt)}</span>
               <span className="w-0.5 h-0.5 rounded-full bg-gray-300 shrink-0" />
               <span className="flex items-center gap-1 shrink-0"><BookOpen className="h-2.5 w-2.5" /> {calculateReadingTime(article.content)} min</span>
             </div>
@@ -217,11 +225,9 @@ export default function ArticleCard({ article, variant = "default", className }:
           </p>
         </div>
         <div className="flex flex-col gap-1 mt-auto pt-2 border-t border-gray-50">
-          <span className="text-[9px] font-bold text-red-700 uppercase tracking-tight truncate block">
-            {article.authorName || "Staff"}
-          </span>
+          <AuthorLink authorId={article.authorId} authorName={article.authorName || "Staff"} className="text-[9px] font-bold text-red-700 uppercase tracking-tight truncate block" />
           <div className="flex items-center gap-2 text-[9px] text-gray-400">
-            <span className="flex items-center gap-1 whitespace-nowrap"><Clock className="h-2.5 w-2.5" /> {timeAgo(article.publishedAt)}</span>
+            <span className="flex items-center gap-1 whitespace-nowrap" suppressHydrationWarning><Clock className="h-2.5 w-2.5" /> {timeAgo(article.publishedAt)}</span>
             <span className="w-0.5 h-0.5 rounded-full bg-gray-200" />
             <span className="flex items-center gap-1 whitespace-nowrap">
               <BookOpen className="h-2.5 w-2.5" /> {calculateReadingTime(article.content)} min

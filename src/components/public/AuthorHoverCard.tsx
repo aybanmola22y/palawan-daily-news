@@ -22,13 +22,15 @@ export default async function AuthorHoverCard({
   role = "Staff Reporter",
 }: AuthorHoverCardProps) {
   // Fetch author's most recent articles for the hover card
-  // For now, we manually filter the published articles since we don't have a dedicated getArticlesByAuthor query
-  const allArticles = await getPublishedArticles();
+  // Use a small limit to avoid hitting the 2MB Next.js cache limit
+  const allArticles = authorId
+    ? await getPublishedArticles({ limit: 50 })
+    : await getPublishedArticles({ limit: 50 });
   
   // Try to match by authorId if present, else by authorName (for imported ones)
   const authorArticles = allArticles
     .filter(a => authorId ? String(a.authorId) === String(authorId) : a.authorName === authorName)
-    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime())
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, 3); // Get 3 most recent
 
   const renderTriggerContent = () => (

@@ -11,7 +11,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 export const metadata: Metadata = {
   metadataBase: new URL("https://palawandailynews.ph"),
   title: {
-    default: "Palawan Daily News",
+    default: "Palawan Daily News | Trusted and Fair Quad Media Network in MIMAROPA",
     template: "%s | Palawan Daily News",
   },
   description: "Palawan's premier source for local news, breaking stories, and in-depth reporting on the Philippines' last ecological frontier.",
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     locale: "en_PH",
     url: "https://palawandailynews.ph",
     siteName: "Palawan Daily News",
-    title: "Palawan Daily News",
-    description: "Palawan's premier source for local news, breaking stories, and in-depth reporting.",
+    title: "Palawan Daily News | Trusted and Fair Quad Media Network in MIMAROPA",
+    description: "Palawan's premier source for local news, breaking stories, and trusted, fair reporting in MIMAROPA.",
     images: [
       {
         url: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=1200&h=630&fit=crop",
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Palawan Daily News",
-    description: "Palawan's premier source for local news, breaking stories, and in-depth reporting.",
+    title: "Palawan Daily News | Trusted and Fair Quad Media Network in MIMAROPA",
+    description: "Palawan's premier source for local news, breaking stories, and trusted, fair reporting in MIMAROPA.",
   },
 };
 

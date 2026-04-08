@@ -13,7 +13,7 @@ export interface SiteSettings {
 
 const DEFAULT_SETTINGS: SiteSettings = {
   siteName: "Palawan Daily News",
-  tagline: "Palawan's Premier News Source",
+  tagline: "Trusted and Fair Quad Media Network in MIMAROPA",
   contactEmail: "editorial@palawandaily.com",
   articlesPerPage: 10,
   enableComments: false,
@@ -29,7 +29,7 @@ export async function getSettings(): Promise<SiteSettings> {
       .select("*")
       .eq("key", "site_configs")
       .single();
-    
+
     if (!error && data) {
       return { ...DEFAULT_SETTINGS, ...data.value };
     }
@@ -41,14 +41,14 @@ export async function updateSettings(updates: Partial<SiteSettings>): Promise<bo
   if (isSupabaseConfigured) {
     const current = await getSettings();
     const newValue = { ...current, ...updates };
-    
+
     const { error } = await supabaseAdmin
       .from("settings")
-      .upsert({ 
-        key: "site_configs", 
-        value: newValue 
+      .upsert({
+        key: "site_configs",
+        value: newValue
       });
-    
+
     if (!error) {
       const { revalidatePath } = await import("next/cache");
       revalidatePath("/");

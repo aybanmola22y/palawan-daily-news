@@ -54,22 +54,28 @@ export default async function ArticlePage({ params }: Props) {
   // Increment views in the background
   incrementArticleViews(slug).catch(err => console.error("View count error:", err));
 
-  const published = await getPublishedArticles();
+  // Fetch articles from the same category for "More from X" — use categorySlug for accuracy
+  const [categoryArticles, recentArticles] = await Promise.all([
+    getPublishedArticles({ categorySlug: article.categorySlug, limit: 10 }),
+    getPublishedArticles({ limit: 20 }),
+  ]);
 
-  // Strictly same category for consistency
-  const moreFromCategory = published
-    .filter((a) => a.id !== article.id && a.categorySlug === article.categorySlug)
+  // Strictly same category for "More from [Category]"
+  const moreFromCategory = categoryArticles
+    .filter((a) => a.id !== article.id)
     .slice(0, 3);
 
-  // If we don't have enough from the same category, maybe allow tag matches but prioritize category
+  // Related = same category first, then tag matches from recent articles as backup
   const related = moreFromCategory.length >= 3
     ? moreFromCategory
-    : published
-      .filter((a) =>
-        a.id !== article.id &&
-        (a.categorySlug === article.categorySlug || a.tags.some(tag => article.tags.includes(tag)))
-      )
-      .slice(0, 3);
+    : [
+        ...moreFromCategory,
+        ...recentArticles.filter((a) =>
+          a.id !== article.id &&
+          a.categorySlug !== article.categorySlug &&
+          a.tags.some(tag => article.tags.includes(tag))
+        ),
+      ].slice(0, 3);
 
   const ads = await getAds();
   const sidebarAd = ads.find((ad) => ad.id === "article-sidebar");

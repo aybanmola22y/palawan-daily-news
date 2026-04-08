@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: Props) {
 
   const articles = await getPublishedArticles({ 
     categorySlug: category, 
-    limit: category === "all" ? 1000 : 500 
+    limit: category === "all" ? 100 : 60 
   });
 
   const colorMap: Record<string, string> = {

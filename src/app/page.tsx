@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/public/Navbar";
@@ -18,13 +17,13 @@ import SectionHeader from "@/components/public/SectionHeader";
 import BannerAd from "@/components/public/BannerAd";
 
 export const metadata: Metadata = {
-  title: "Palawan Daily News - Palawan's Premier News Source",
-  description: "Stay updated with the latest news from Palawan, Philippines. Breaking news, politics, business, sports, and more.",
+  title: "Palawan Daily News | Trusted and Fair Quad Media Network in MIMAROPA",
+  description: "Stay updated with the latest news from Palawan, Philippines. Trusted and Fair Quad Media Network in MIMAROPA.",
 };
 
 export default async function HomePage() {
   const [published, allCategories, ads, trendingArticles] = await Promise.all([
-    getPublishedArticles({ limit: 500 }),
+    getPublishedArticles({ limit: 100 }),
     getCategories(),
     getAds(),
     getTrendingArticles(5)
@@ -60,8 +59,8 @@ export default async function HomePage() {
             <p className="text-amber-800 mb-6 max-w-lg mx-auto">
               You are successfully connected to Supabase. To see your content here, please go to the Admin Dashboard and create your first article, or run the seed script.
             </p>
-            <Link 
-              href="/admin" 
+            <Link
+              href="/admin"
               className="inline-flex items-center gap-2 bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
             >
               Go to Admin Dashboard <ArrowRight className="h-4 w-4" />
