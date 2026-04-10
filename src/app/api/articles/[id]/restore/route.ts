@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { restoreArticle } from "@/lib/articles-service";
+import { restoreArticle } from "@/lib/articles-actions";
 
 export async function POST(
   _request: Request,

@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  getArticleById,
-  deleteArticle,
-  updateArticle,
-  type StoredArticle,
-} from "@/lib/articles-service";
+import { getArticleById, type StoredArticle } from "@/lib/articles-service";
+import { deleteArticle, updateArticle, permanentlyDeleteArticle } from "@/lib/articles-actions";
 
 export async function GET(
   _request: Request,
@@ -85,7 +81,6 @@ export async function DELETE(
 
   let success;
   if (permanent) {
-    const { permanentlyDeleteArticle } = await import("@/lib/articles-service");
     success = await permanentlyDeleteArticle(id);
   } else {
     success = await deleteArticle(id);

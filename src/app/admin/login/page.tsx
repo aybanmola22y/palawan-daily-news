@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock, ChevronLeft } from "lucide-react";
+import { BrandLogo } from "@/components/admin/BrandLogo";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -43,29 +44,10 @@ export default function AdminLoginPage() {
       
       <div className="w-full max-w-[440px] z-10 transition-all duration-700 ease-out">
         {/* Logo Section */}
-        <div className="flex flex-col items-center mb-10 transition-all duration-500 transform hover:scale-[1.02]">
-          <Link href="/" className="flex flex-col items-center group">
-            <div className="text-[9px] font-bold tracking-[0.25em] text-slate-500 uppercase pb-1.5 transition-colors group-hover:text-slate-400">
-              Trusted, Fair & Balanced Reporting
-            </div>
-            <div className="font-playfair font-black text-3xl sm:text-4xl leading-none tracking-tight">
-              <span className="text-white">Palawan</span>
-              <span className="text-[#f36f21]">Daily</span>
-              <span className="text-[#f36f21] text-[12px] align-top ml-1 font-bold">TM</span>
-            </div>
-            <div className="flex items-center w-full gap-2 mt-2">
-              <div className="h-[2px] bg-[#f36f21] grow min-w-[24px]" />
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.4em] text-slate-400 uppercase leading-none">
-                News
-              </span>
-              <div className="h-[2px] bg-[#f36f21] grow min-w-[24px]" />
-            </div>
+        <div className="mb-10 transition-all duration-500 transform hover:scale-[1.02]">
+          <Link href="/" className="group">
+            <BrandLogo size="xl" subtext="Admin Portal" forceDark={true} />
           </Link>
-          <div className="mt-8 flex items-center gap-4">
-            <div className="h-[1px] w-10 bg-slate-800" />
-            <p className="text-slate-400 text-[10px] font-black tracking-[0.3em] uppercase opacity-60">Admin Portal</p>
-            <div className="h-[1px] w-10 bg-slate-800" />
-          </div>
         </div>
 
         {/* Login Card */}
@@ -94,7 +76,7 @@ export default function AdminLoginPage() {
             <form onSubmit={handleSubmit} className="space-y-7">
               <div className="space-y-2.5">
                 <label htmlFor="admin-email" className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">
-                  Email Address
+                   Email Address
                 </label>
                 <div className="relative group/input">
                   <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-[#f36f21] transition-colors duration-300">

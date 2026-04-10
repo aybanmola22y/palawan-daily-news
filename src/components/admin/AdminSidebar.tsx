@@ -7,6 +7,7 @@ import {
   LogOut, Menu, X, ChevronRight, Settings, PlusCircle, Megaphone, Trash2
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { BrandLogo } from "./BrandLogo";
 
 const nav = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -37,7 +38,6 @@ export default function AdminSidebar({ user }: Props) {
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
-    // Check if there's a more specific (longer) match in the navigation
     const hasMoreSpecificMatch = nav.some(item =>
       item.href !== href &&
       item.href.length > href.length &&
@@ -50,21 +50,10 @@ export default function AdminSidebar({ user }: Props) {
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
       {/* Logo */}
-      <div className="relative flex items-center p-4 border-b border-sidebar-border">
+      <div className="relative flex items-center p-6 border-b border-sidebar-border h-[88px] shrink-0">
         {!collapsed && (
-          <div className="flex-1 text-center">
-            <div className="leading-none inline-block">
-              <div className="font-playfair font-black text-lg tracking-tight">
-                <span className="text-foreground">Palawan</span>
-                <span className="text-primary italic">Daily</span>
-                <span className="text-primary text-[10px] align-top ml-0.5 font-bold">TM</span>
-              </div>
-              <div className="mt-1 flex items-center justify-center gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
-                  Admin CMS
-                </span>
-              </div>
-            </div>
+          <div className="flex-1 transition-all duration-300 transform hover:scale-[1.05]">
+            <BrandLogo subtext="ADMIN CMS" size="sm" className="items-start" />
           </div>
         )}
         <button
@@ -147,7 +136,6 @@ export default function AdminSidebar({ user }: Props) {
 
   return (
     <>
-      {/* Mobile toggle */}
       <button
         className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-lg shadow-lg"
         onClick={() => setMobileOpen(!mobileOpen)}
@@ -155,7 +143,6 @@ export default function AdminSidebar({ user }: Props) {
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-40"
@@ -163,12 +150,10 @@ export default function AdminSidebar({ user }: Props) {
         />
       )}
 
-      {/* Mobile sidebar */}
       <div className={`lg:hidden fixed left-0 top-0 h-full w-64 z-50 transform transition-transform ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <SidebarContent />
       </div>
 
-      {/* Desktop sidebar */}
       <div className={`hidden lg:flex flex-col h-screen sticky top-0 transition-all duration-200 ${collapsed ? "w-16" : "w-64"} shrink-0`}>
         <SidebarContent />
       </div>

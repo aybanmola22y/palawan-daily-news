@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Facebook, Users } from "lucide-react";
-import type { OrgChartDepartment, OrgChartEmployee } from "@/lib/mock-data";
+import type { OrgChartDepartment } from "@/lib/mock-data";
 import { mockOrgChartDepartments, mockOrgChartEmployees } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 const departments: { slug: OrgChartDepartment | "all"; label: string }[] = [
-  { slug: "all", label: "All" },
+  { slug: "all", label: "All Departments" },
   ...mockOrgChartDepartments,
 ];
 
@@ -26,42 +27,42 @@ export default function WhoWeAre({ initialAuthors = [] }: WhoWeAreProps) {
       : authors.filter((e) => e.department === filter);
 
   return (
-    <section className="mt-16 pt-16 border-t border-gray-200/80">
-      <div className="text-center mb-12">
-        <span className="inline-flex items-center gap-2 text-sm font-medium tracking-widest uppercase text-red-600 mb-3">
-          <Users className="h-4 w-4" />
-          Meet the team
-        </span>
-        <h2 className="font-playfair text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
-          Who we are
+    <section className="pt-24 border-t border-slate-100">
+      <div className="text-center mb-16 space-y-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 text-slate-400 mb-2 border border-slate-100">
+          <Users className="h-3 w-3" />
+          <span className="text-[9px] font-black uppercase tracking-[0.2em]">The Newsroom</span>
+        </div>
+        <h2 className="font-playfair text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter">
+          Meet our Journalists
         </h2>
-        <p className="mt-3 text-gray-600 max-w-xl mx-auto">
-          The people behind Palawan Daily News — dedicated to trusted, fair and balanced reporting.
+        <p className="mt-4 text-slate-500 max-w-xl mx-auto font-light text-lg leading-relaxed">
+          The dedicated professionals behind Palawan Daily News, 
+          upholding the highest standards of reporting.
         </p>
       </div>
 
-      {/* Filter: pill tabs with horizontal scroll on mobile */}
-      <div className="mb-10 -mx-4 sm:mx-0 overflow-x-auto px-4 sm:px-0">
-        <div className="flex gap-2 min-w-max sm:min-w-0 sm:flex-wrap sm:justify-center pb-2">
-          {departments.map((d) => (
-            <button
-              key={d.slug}
-              type="button"
-              onClick={() => setFilter(d.slug)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                filter === d.slug
-                  ? "bg-gray-900 text-white shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
+      {/* Filter: pill tabs with professional styling */}
+      <div className="mb-16 flex flex-wrap justify-center gap-2">
+        {departments.map((d) => (
+          <button
+            key={d.slug}
+            type="button"
+            onClick={() => setFilter(d.slug)}
+            className={cn(
+               "px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-[0.1em] transition-all duration-300 border",
+               filter === d.slug
+                 ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/20 scale-105"
+                 : "bg-white text-slate-500 border-slate-100 hover:border-slate-900 hover:text-slate-900"
+            )}
+          >
+            {d.label}
+          </button>
+        ))}
       </div>
 
-      {/* Employee cards: elevated card design */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Employee cards: clinical modern design */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filtered.map((emp) => (
           <EmployeeCard key={emp.id} employee={emp} />
         ))}
@@ -73,45 +74,54 @@ export default function WhoWeAre({ initialAuthors = [] }: WhoWeAreProps) {
 function EmployeeCard({ employee }: { employee: any }) {
   const avatar = employee.avatarUrl || employee.avatar_url;
   return (
-    <article className="group flex gap-5 p-5 rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all duration-300">
-      <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-gray-100 ring-1 ring-gray-100">
-        {avatar ? (
-          <Image
-            src={avatar}
-            alt={employee.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="80px"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-400 group-hover:text-[#f36f21] transition-colors relative overflow-hidden">
-            <Image 
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=f36f21&color=fff`}
+    <article className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100/80 shadow-sm transition-all duration-500 hover:border-slate-900/5 hover:-translate-y-2 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.06)] flex flex-col items-center text-center">
+      <div className="relative w-24 h-24 mb-6">
+        <div className="absolute inset-0 rounded-full border border-slate-100 group-hover:scale-110 group-hover:border-[#f36f21]/30 transition-all duration-500" />
+        <div className="relative w-full h-full rounded-full overflow-hidden p-1.5 grayscale group-hover:grayscale-0 transition-all duration-700">
+          {avatar ? (
+            <Image
+              src={avatar}
               alt={employee.name}
               fill
-              className="object-cover"
+              className="object-cover rounded-full"
+              sizes="96px"
             />
-          </div>
-        )}
+          ) : (
+             <Image 
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=f36f21&color=fff&bold=true`}
+              alt={employee.name}
+              fill
+              className="object-cover rounded-full"
+            />
+          )}
+        </div>
       </div>
-      <div className="flex-1 min-w-0 pt-0.5">
-        <h3 className="font-semibold text-gray-900 group-hover:text-[#f36f21] transition-colors">
+      
+      <div className="space-y-1">
+        <h3 className="font-playfair text-2xl font-black text-slate-900 tracking-tight group-hover:text-[#f36f21] transition-colors duration-300">
           {employee.name}
         </h3>
-        <p className="text-sm text-gray-600 mt-0.5 leading-snug">{employee.title}</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-600 transition-colors">
+          {employee.title}
+        </p>
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-slate-50 w-full flex justify-center">
         {employee.facebookUrl && (
           <a
             href={employee.facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-gray-500 hover:text-[#1877f2] transition-colors"
+            className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 hover:bg-[#1877f2] hover:text-white transition-all duration-300 shadow-sm"
             aria-label={`${employee.name} on Facebook`}
           >
             <Facebook className="h-4 w-4" />
-            Profile
           </a>
         )}
       </div>
+
+      {/* Background flourish */}
+      <div className="absolute top-0 right-0 w-16 h-16 bg-slate-50 rounded-bl-[100%] transition-colors duration-500 group-hover:bg-[#f36f21]/5" />
     </article>
   );
 }

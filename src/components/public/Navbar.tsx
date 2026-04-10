@@ -1,9 +1,11 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BrandLogo } from "@/components/admin/BrandLogo";
 
 const mainNavItems = [
   { name: "Home", slug: "" },
@@ -37,28 +39,13 @@ export default function Navbar() {
 
   return (
     <>
-
-
-      {/* Main header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center h-16">
+          <div className="flex items-center h-20">
             {/* Left: Logo */}
             <div className="flex-1 flex items-center justify-start">
-              <Link href="/" className="flex flex-col items-center justify-center shrink-0 pt-1 pb-1">
-                <div className="text-[7px] font-medium tracking-[0.15em] text-gray-500 uppercase pb-0.5 sm:text-[8px]">
-                  Trusted and Fair Quad Media Network in MIMAROPA
-                </div>
-                <div className="font-playfair font-black text-2xl sm:text-3xl leading-none tracking-tight">
-                  <span className="text-gray-900">Palawan</span>
-                  <span className="text-[#f36f21]">Daily</span>
-                  <span className="text-[#f36f21] text-[10px] align-top ml-0.5 font-bold">TM</span>
-                </div>
-                <div className="flex items-center w-full gap-1 mt-0.5">
-                  <div className="h-[2px] bg-[#f36f21] grow" />
-                  <span className="text-[7px] sm:text-[8px] font-bold tracking-[0.2em] text-gray-800 uppercase leading-none">News</span>
-                  <div className="h-[2px] bg-[#f36f21] grow" />
-                </div>
+              <Link href="/" className="group transition-transform hover:scale-[1.02] duration-300">
+                <BrandLogo size="sm" subtext="News" className="items-start" showTagline={true} />
               </Link>
             </div>
 
@@ -68,17 +55,16 @@ export default function Navbar() {
                 <Link
                   key={cat.slug}
                   href={cat.slug ? `/category/${cat.slug}` : "/"}
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors whitespace-nowrap"
+                  className="px-4 py-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 hover:text-slate-950 transition-colors whitespace-nowrap"
                 >
                   {cat.name}
                 </Link>
               ))}
 
-
-              <div className="flex items-center">
+              <div className="flex items-center ml-2 border-l border-slate-100 pl-4">
                 <Link
                   href="/about"
-                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-l-md transition-colors"
+                  className="px-4 py-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-950 hover:text-[#f36f21] transition-colors"
                 >
                   About PDN
                 </Link>
@@ -86,24 +72,24 @@ export default function Navbar() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="px-1.5 py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-r-md transition-colors border-l border-gray-100"
+                      className="p-2 text-slate-400 hover:text-[#f36f21] transition-colors"
                     >
                       <ChevronDown className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-100 shadow-xl">
                     <DropdownMenuItem asChild>
-                      <Link href="/about" className="w-full">
+                      <Link href="/about" className="w-full text-xs font-bold py-2.5 rounded-lg px-3 hover:bg-slate-50 transition-colors">
                         About PDN (Main)
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/about/contact-us" className="w-full">
+                      <Link href="/about/contact-us" className="w-full text-xs font-bold py-2.5 rounded-lg px-3 hover:bg-slate-50 transition-colors">
                         Contact Us
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/about/ownership-and-funding" className="w-full">
+                      <Link href="/about/ownership-and-funding" className="w-full text-xs font-bold py-2.5 rounded-lg px-3 hover:bg-slate-50 transition-colors">
                         Ownership and Funding
                       </Link>
                     </DropdownMenuItem>
@@ -113,37 +99,37 @@ export default function Navbar() {
             </nav>
 
             {/* Right actions */}
-            <div className="flex-1 flex items-center justify-end gap-2">
+            <div className="flex-1 flex items-center justify-end gap-3">
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                className="p-3 text-slate-400 hover:text-slate-950 hover:bg-slate-50 rounded-full transition-all duration-300"
               >
                 <Search className="h-5 w-5" />
               </button>
               <button
-                className="lg:hidden p-2 text-gray-500 hover:text-red-600"
+                className="lg:hidden p-2 text-slate-500 hover:text-slate-950"
                 onClick={() => setMobileOpen(!mobileOpen)}
               >
-                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
 
           {/* Search bar */}
           {searchOpen && (
-            <div className="pb-3">
+            <div className="pb-6 animate-in slide-in-from-top duration-300">
               <form action="/search" method="get">
-                <div className="flex gap-2">
+                <div className="flex gap-2 p-1 bg-slate-50 rounded-2xl border border-slate-100">
                   <input
                     type="search"
                     name="q"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search news..."
-                    className="flex-1 h-10 px-4 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Search for articles, news, or topics..."
+                    className="flex-1 h-12 px-6 bg-transparent text-sm focus:outline-none"
                     autoFocus
                   />
-                  <Button type="submit" variant="default" size="sm" className="bg-red-600 hover:bg-red-700">
+                  <Button type="submit" variant="default" className="bg-slate-950 hover:bg-[#f36f21] rounded-xl h-12 px-8 transition-colors">
                     Search
                   </Button>
                 </div>
@@ -153,43 +139,43 @@ export default function Navbar() {
 
           {/* Mobile menu */}
           {mobileOpen && (
-            <div className="lg:hidden border-t border-gray-200 py-3">
+            <div className="lg:hidden border-t border-slate-100 py-6 space-y-1 animate-in slide-in-from-top duration-300">
               {[...mainNavItems, ...moreCategories].map((cat) => (
                 <Link
                   key={cat.slug}
                   href={cat.slug ? `/category/${cat.slug}` : "/"}
-                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md"
+                  className="block px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-slate-500 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all"
                   onClick={() => setMobileOpen(false)}
                 >
                   {cat.name}
                 </Link>
               ))}
 
-              <div className="mt-2 pt-2 border-t border-gray-200">
+              <div className="pt-4 mt-4 border-t border-slate-100">
                 <div
-                  className="w-full flex items-center justify-between px-3 py-1 text-sm font-medium text-gray-700"
+                  className="w-full flex items-center justify-between px-4 py-2"
                 >
                   <Link 
                     href="/about" 
-                    className="flex-1 py-1 hover:text-red-600"
+                    className="flex-1 text-xs font-black uppercase tracking-[0.2em] text-slate-950 hover:text-[#f36f21] transition-colors"
                     onClick={() => setMobileOpen(false)}
                   >
                     About PDN
                   </Link>
                   <button
                     type="button"
-                    className="p-2 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-2 hover:bg-slate-50 rounded-xl transition-colors"
                     onClick={() => setMobileAboutOpen((v) => !v)}
                     aria-expanded={mobileAboutOpen}
                   >
-                    <ChevronDown className={`h-4 w-4 transition-transform ${mobileAboutOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${mobileAboutOpen ? "rotate-180" : ""}`} />
                   </button>
                 </div>
                 {mobileAboutOpen && (
-                  <div className="pl-3">
+                  <div className="pl-4 mt-2 space-y-1">
                     <Link
                       href="/about/contact-us"
-                      className="block px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md"
+                      className="block px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all"
                       onClick={() => {
                         setMobileOpen(false);
                         setMobileAboutOpen(false);
@@ -199,7 +185,7 @@ export default function Navbar() {
                     </Link>
                     <Link
                       href="/about/ownership-and-funding"
-                      className="block px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md"
+                      className="block px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 hover:text-slate-950 hover:bg-slate-50 rounded-xl transition-all"
                       onClick={() => {
                         setMobileOpen(false);
                         setMobileAboutOpen(false);

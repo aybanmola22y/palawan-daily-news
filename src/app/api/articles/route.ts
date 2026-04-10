@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { createArticle } = await import("@/lib/articles-service");
+    const { createArticle } = await import("@/lib/articles-actions");
     const { getCategories } = await import("@/lib/categories-service");
     const categories = await getCategories();
 

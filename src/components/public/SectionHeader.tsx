@@ -4,45 +4,20 @@ import { ArrowRight } from "lucide-react";
 interface Props {
   title: string;
   href?: string;
-  color?: string;
+  color?: string; // kept for API compatibility, no longer used for styling
 }
 
-export default function SectionHeader({ title, href, color = "red" }: Props) {
-  // Mapping of category colors to Tailwind background classes
-  const bgClasses: Record<string, string> = {
-    red: "bg-red-600",
-    blue: "bg-blue-600",
-    emerald: "bg-emerald-600",
-    green: "bg-emerald-600",
-    indigo: "bg-indigo-600",
-    purple: "bg-purple-600",
-    slate: "bg-slate-700",
-    gray: "bg-gray-600",
-    amber: "bg-amber-600",
-    pink: "bg-pink-600",
-    sky: "bg-sky-600",
-    orange: "bg-orange-500",
-    teal: "bg-teal-600",
-  };
-
-  const bgColor = bgClasses[color] || "bg-red-600";
-
+export default function SectionHeader({ title, href }: Props) {
   return (
-    <div className="relative mb-6 flex items-center group">
-      <div className={`${bgColor} text-white px-4 py-2 text-sm font-bold uppercase tracking-widest leading-none relative z-10 shadow-sm whitespace-nowrap`}>
+    <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-gray-900">
+      <h2 className="font-playfair font-black text-base text-gray-900 uppercase tracking-[0.06em] flex items-center gap-2.5">
+        <span className="w-[3px] h-[18px] bg-[#f36f21] inline-block shrink-0" />
         {title}
-        {/* Decorative notch */}
-        <div 
-          className={`absolute top-0 -right-2 h-full w-2 ${bgColor}`} 
-          style={{ clipPath: 'polygon(0 0, 0 100%, 100% 100%)' }}
-        />
-      </div>
-      <div className={`flex-1 h-[2px] ${bgColor} opacity-20`} />
-      
+      </h2>
       {href && (
-        <Link 
-          href={href} 
-          className="ml-4 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-600 transition-colors"
+        <Link
+          href={href}
+          className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 hover:text-[#f36f21] transition-colors"
         >
           View All <ArrowRight className="h-3 w-3" />
         </Link>
