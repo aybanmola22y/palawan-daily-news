@@ -129,29 +129,6 @@
     "deletedAt": null
   },
   {
-    "id": 6,
-    "title": "sample news article",
-    "slug": "sample-news-article",
-    "excerpt": "sample news article",
-    "content": "<p>sample news article</p>",
-    "featuredImage": "/uploads/0a31f403-5bc7-4ae0-82b5-cfaa429bf036.jpg",
-    "categoryId": 1,
-    "categoryName": "",
-    "categorySlug": "",
-    "authorName": "Harthwell Capistrano",
-    "authorAvatar": "&crop=face",
-    "status": "published",
-    "featured": true,
-    "breaking": true,
-    "views": 1,
-    "publishedAt": "2026-03-26T06:00:24.620Z",
-    "tags": [
-      "sample news article"
-    ],
-    "seoTitle": "",
-    "seoDescription": ""
-  },
-  {
     "id": 36,
     "title": "Palawan Named World's Best Island for the 7th Consecutive Year",
     "slug": "palawan-named-worlds-best-island-seventh-year",

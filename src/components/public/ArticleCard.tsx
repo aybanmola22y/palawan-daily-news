@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Eye, BookOpen } from "lucide-react";
+import { Clock, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { timeAgo, truncate, cn, calculateReadingTime } from "@/lib/utils";
 import type { MockArticle } from "@/lib/mock-data";
@@ -86,7 +86,7 @@ export default function ArticleCard({ article, variant = "default", className }:
   if (variant === "featured") {
     return (
       <div className="relative overflow-hidden rounded-xl group bg-gray-900 h-full">
-        <div className="relative aspect-[4/3] md:aspect-[2/1] lg:aspect-[1.8/1] w-full">
+        <div className="relative aspect-4/3 md:aspect-2/1 lg:aspect-1.8/1 w-full">
           <Image
             src={imgSrc}
             alt={article.title}
@@ -95,7 +95,7 @@ export default function ArticleCard({ article, variant = "default", className }:
             priority
             onError={() => setImgSrc(fallback)}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-black/10" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
           <div className="flex items-center gap-2 mb-3">
@@ -141,12 +141,12 @@ export default function ArticleCard({ article, variant = "default", className }:
   if (variant === "horizontal") {
     return (
       <div className="flex gap-4 group">
-        <div className="relative flex-shrink-0 w-40 sm:w-44 aspect-[16/9] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
+        <div className="relative shrink-0 w-40 sm:w-44 aspect-video bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
           <Image
             src={imgSrc}
             alt={article.title}
             fill
-            className="flex-shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
+            className="shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
             onError={() => setImgSrc(fallback)}
           />
         </div>
@@ -175,8 +175,8 @@ export default function ArticleCard({ article, variant = "default", className }:
   if (variant === "compact") {
     return (
       <div className="flex gap-3 py-3 border-b border-gray-100 last:border-0 group">
-        <span className="text-2xl font-bold text-red-100 leading-none flex-shrink-0 w-8">
-          {String(1).padStart(2, "0")}
+        <span className="text-2xl font-bold text-red-100 leading-none shrink-0 w-8">
+          {String(article.id).padStart(2, "0")}
         </span>
         <div>
           <Link href={`/news/${article.slug}`}>
@@ -194,7 +194,7 @@ export default function ArticleCard({ article, variant = "default", className }:
 
   return (
     <div className={cn("bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex flex-col", className)}>
-      <div className="relative aspect-[1200/630] w-full overflow-hidden flex-shrink-0 bg-gray-50 border-b border-gray-100">
+      <div className="relative aspect-1200/630 w-full overflow-hidden shrink-0 bg-gray-50 border-b border-gray-100">
         <Image
           src={imgSrc}
           alt={article.title}
@@ -208,19 +208,19 @@ export default function ArticleCard({ article, variant = "default", className }:
           </div>
         )}
       </div>
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="p-4 flex flex-col grow">
         <div className="flex items-center justify-between mb-2 min-w-0">
           <Badge variant={CATEGORY_VARIANT_MAP[article.categorySlug] || "unified"} className="text-[9px] px-1.5 py-0">
             {article.categoryName}
           </Badge>
         </div>
-        <div className="flex-grow flex flex-col">
+        <div className="grow flex flex-col">
           <Link href={`/news/${article.slug}`}>
-            <h3 className="font-playfair font-bold text-gray-900 hover:text-red-600 transition-colors leading-snug mb-3 line-clamp-2 min-h-[2.5rem]">
+            <h3 className="font-playfair font-bold text-gray-900 hover:text-red-600 transition-colors leading-snug mb-3 line-clamp-2 min-h-10">
               {article.title}
             </h3>
           </Link>
-          <p className="text-sm text-gray-500 line-clamp-2 mb-4 min-h-[2.5rem]">
+          <p className="text-sm text-gray-500 line-clamp-2 mb-4 min-h-10">
             {article.excerpt}
           </p>
         </div>

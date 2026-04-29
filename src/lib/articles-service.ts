@@ -182,13 +182,62 @@ const SPAM_KEYWORDS = [
   "cash collect", "real money", "free spins"
 ];
 
+/** Test / junk rows that may still exist in Supabase — never show on the public site. */
+const EXCLUDED_PUBLIC_SLUGS = new Set(["sample-news-article"]);
+
+function filterPublicFeed<T extends { slug: string }>(articles: T[]): T[] {
+  return articles.filter((a) => !EXCLUDED_PUBLIC_SLUGS.has(a.slug));
+}
+
+/**
+ * Slugs + dates only — for /sitemap.xml. Does NOT use unstable_cache
+ * (large sites would exceed Next.js’s ~2MB cache limit when full articles are cached).
+ */
+export async function getPublishedArticleEntriesForSitemap(): Promise<
+  { slug: string; publishedAt: string | Date }[]
+> {
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("slug, published_at, title")
+      .eq("status", "published")
+      .is("deleted_at", null);
+
+    if (!error && data) {
+      return data
+        .filter((row) => row.slug && !EXCLUDED_PUBLIC_SLUGS.has(row.slug))
+        .filter((row) => {
+          const t = (row.title || "").toLowerCase();
+          return !SPAM_KEYWORDS.some((k) => t.includes(k));
+        })
+        .map((row) => ({
+          slug: row.slug,
+          publishedAt: row.published_at,
+        }));
+    }
+  }
+
+  const stored = await getArticles(false, 50000);
+  let rows = stored.filter((a) => {
+    if (a.status === "published") return true;
+    if (a.status === "scheduled") return new Date(a.publishedAt) <= new Date();
+    return false;
+  });
+  rows = filterPublicFeed(rows);
+  rows = rows.filter((a) => {
+    const t = a.title.toLowerCase();
+    return !SPAM_KEYWORDS.some((k) => t.includes(k));
+  });
+  return rows.map((a) => ({ slug: a.slug, publishedAt: a.publishedAt }));
+}
+
 export async function getArticlesForFrontend() {
   const stored = await getArticles(false, 2000);
   return stored.map(fromStored);
 }
 
 export async function getPublishedArticles(options: { limit?: number; categorySlug?: string } = {}) {
-  const cacheKey = `published-articles-${options.limit ?? 1000}-${options.categorySlug ?? 'all'}`;
+  const cacheKey = `published-articles-v2-${options.limit ?? 1000}-${options.categorySlug ?? 'all'}`;
   
   return unstable_cache(
     async () => {
@@ -224,6 +273,7 @@ export async function getPublishedArticles(options: { limit?: number; categorySl
 
         if (!error && data) {
           let published = data.map(fromSupabase).map(fromStored);
+          published = filterPublicFeed(published);
           return published.filter(a => {
             const t = a.title.toLowerCase();
             return !SPAM_KEYWORDS.some(k => t.includes(k));
@@ -257,6 +307,8 @@ export async function getPublishedArticles(options: { limit?: number; categorySl
         return !SPAM_KEYWORDS.some(k => t.includes(k));
       });
 
+      published = filterPublicFeed(published);
+
       published.sort((a, b) => {
         const featuredDiff = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
         if (featuredDiff !== 0) return featuredDiff;
@@ -285,7 +337,7 @@ export async function searchArticles(query: string, limit: number = 100): Promis
       .limit(limit);
 
     if (!error && data) {
-      return data.map(fromSupabase).map(fromStored);
+      return filterPublicFeed(data.map(fromSupabase).map(fromStored));
     }
   }
   const all = await getPublishedArticles({ limit: 100 });
@@ -300,6 +352,8 @@ export async function getArticleById(id: number) {
 }
 
 export async function getArticleBySlug(slug: string) {
+  if (EXCLUDED_PUBLIC_SLUGS.has(slug)) return null;
+
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from("articles")
@@ -379,7 +433,7 @@ export async function getArticlesByAuthor(authorId: string) {
       .eq("author_id", authorId)
       .eq("status", "published")
       .order("published_at", { ascending: false });
-    if (!error && data) return data.map(fromSupabase).map(fromStored);
+    if (!error && data) return filterPublicFeed(data.map(fromSupabase).map(fromStored));
   }
   const decodedId = decodeURIComponent(authorId);
   const articles = await getPublishedArticles({ limit: 100 });
@@ -417,12 +471,14 @@ export async function getTrendingArticles(limit: number = 5) {
           .is("deleted_at", null)
           .order("views", { ascending: false })
           .limit(limit);
-        if (!error && data) return data.map(fromSupabase).map(fromStored);
+        if (!error && data) {
+          return filterPublicFeed(data.map(fromSupabase).map(fromStored)).slice(0, limit);
+        }
       }
       const all = await getPublishedArticles({ limit: 100 });
-      return all.sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, limit);
+      return filterPublicFeed(all.sort((a, b) => (b.views || 0) - (a.views || 0))).slice(0, limit);
     },
-    [`trending-articles-${limit}`],
+    [`trending-articles-v2-${limit}`],
     { tags: ['articles'], revalidate: 3600 }
   )();
 }
